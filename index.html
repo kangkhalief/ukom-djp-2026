@@ -1,0 +1,1273 @@
+<title>UKOM Pajak DJP</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* layout: top segmented-tab app shell; Rangkuman = wrapping chip nav + content card; Latihan = sticky score bar + stacked question cards */
+:root{
+  --bg:#f3f1ea;
+  --surface:#ffffff;
+  --surface-2:#faf8f2;
+  --text:#1c2230;
+  --muted:#5b6476;
+  --border:#e4ddc9;
+  --primary:#15335c;
+  --primary-2:#2a52a0;
+  --accent:#b8860f;
+  --accent-soft:#f6ecd0;
+  --danger:#b3261e;
+  --danger-bg:#fbe9e7;
+  --danger-border:#e8a39c;
+  --success:#1e7a3e;
+  --success-bg:#e4f5e8;
+  --success-border:#9bd4ad;
+  --chip-bg:#eee9da;
+  --shadow:0 1px 2px rgba(28,34,48,.06),0 8px 24px -12px rgba(28,34,48,.18);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#13161f; --surface:#1a1e2a; --surface-2:#1f2433; --text:#eef0f6; --muted:#9aa3b8;
+    --border:#2c3245; --primary:#7ea6e8; --primary-2:#9cbcf0; --accent:#e0b84a; --accent-soft:#2c2616;
+    --danger:#ff8a80; --danger-bg:#3a1f1d; --danger-border:#6e332c;
+    --success:#7fe0a0; --success-bg:#17301f; --success-border:#2e5a3c;
+    --chip-bg:#232a3c; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#13161f; --surface:#1a1e2a; --surface-2:#1f2433; --text:#eef0f6; --muted:#9aa3b8;
+  --border:#2c3245; --primary:#7ea6e8; --primary-2:#9cbcf0; --accent:#e0b84a; --accent-soft:#2c2616;
+  --danger:#ff8a80; --danger-bg:#3a1f1d; --danger-border:#6e332c;
+  --success:#7fe0a0; --success-bg:#17301f; --success-border:#2e5a3c;
+  --chip-bg:#232a3c; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:"Plus Jakarta Sans",-apple-system,system-ui,sans-serif;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+  padding-block:20px 56px;
+  line-height:1.5;
+}
+h1,h2,h3,h4{font-family:"Lora",Georgia,serif; font-weight:600; color:var(--text); text-wrap:balance; margin:0;}
+.wrap{max-width:860px; margin:0 auto; width:100%;}
+.app-header{display:flex; flex-direction:column; gap:4px; margin-bottom:16px;}
+.app-header .eyebrow{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--accent); font-weight:600;}
+.app-header h1{font-size:clamp(22px,5vw,30px);}
+.app-header p{color:var(--muted); margin:2px 0 0; font-size:14.5px; max-width:60ch;}
+
+.tabs{display:flex; gap:6px; background:var(--chip-bg); border:1px solid var(--border); border-radius:14px; padding:4px; margin:18px 0 20px; position:sticky; top:env(safe-area-inset-top,0px); z-index:5; box-shadow:var(--shadow);}
+.tab-btn{flex:1; border:none; background:transparent; color:var(--muted); font:inherit; font-weight:700; font-size:14px; padding:10px 12px; border-radius:11px; cursor:pointer; transition:background .15s,color .15s;}
+.tab-btn.active{background:var(--surface); color:var(--primary); box-shadow:var(--shadow);}
+.tab-btn:focus-visible{outline:2px solid var(--primary-2); outline-offset:2px;}
+
+[hidden]{display:none !important;}
+
+/* ---- Rangkuman ---- */
+.bab-nav{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;}
+.bab-chip{border:1px solid var(--border); background:var(--surface); color:var(--text); font:inherit; font-size:13px; font-weight:600; padding:8px 13px; border-radius:999px; cursor:pointer; transition:.15s;}
+.bab-chip .num{font-family:"IBM Plex Mono",monospace; color:var(--muted); margin-right:5px;}
+.bab-chip:hover{border-color:var(--primary-2);}
+.bab-chip.active{background:var(--primary); border-color:var(--primary); color:#fff;}
+.bab-chip.active .num{color:var(--accent);}
+.bab-chip:focus-visible{outline:2px solid var(--primary-2); outline-offset:2px;}
+
+.content-card{background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:22px clamp(16px,4vw,30px) 28px; box-shadow:var(--shadow);}
+.content-card .kicker{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--accent); letter-spacing:.06em; text-transform:uppercase; font-weight:600;}
+.content-card h2{font-size:22px; margin-top:4px; margin-bottom:14px;}
+.content-card h3{font-size:16px; margin-top:22px; margin-bottom:8px; color:var(--primary-2);}
+.content-card h3:first-of-type{margin-top:4px;}
+.content-card p{margin:0 0 10px; color:var(--text);}
+.content-card ul{margin:0 0 10px; padding-left:20px;}
+.content-card li{margin-bottom:6px;}
+.content-card li::marker{color:var(--accent);}
+.box{border-radius:13px; padding:14px 16px; margin:14px 0; border:1px solid var(--border);}
+.box strong{display:block; font-family:"IBM Plex Mono",monospace; font-size:11.5px; letter-spacing:.05em; text-transform:uppercase; margin-bottom:8px;}
+.box ul{margin:0; padding-left:18px;}
+.box p{margin:0;}
+.box-danger{background:var(--danger-bg); border-color:var(--danger-border);}
+.box-danger strong{color:var(--danger);}
+.box-info{background:var(--accent-soft); border-color:var(--border);}
+.box-info strong{color:var(--accent);}
+.table-wrap{overflow-x:auto; margin:14px 0; border:1px solid var(--border); border-radius:10px;}
+table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:420px;}
+th,td{text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top;}
+th{background:var(--surface-2); font-family:"IBM Plex Mono",monospace; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted);}
+tr:last-child td{border-bottom:none;}
+td.num{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; white-space:nowrap;}
+
+/* ---- Latihan ---- */
+.quiz-setup{background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:20px clamp(16px,4vw,26px); box-shadow:var(--shadow); margin-bottom:18px;}
+.quiz-setup h2{font-size:18px; margin-bottom:4px;}
+.quiz-setup p{color:var(--muted); font-size:13.5px; margin:0 0 14px;}
+.step-label{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px;}
+.step-label .dot{width:17px; height:17px; border-radius:50%; background:var(--primary); color:#fff; font-size:10px; display:inline-flex; align-items:center; justify-content:center; font-weight:800;}
+.topic-row{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
+.topic-btn{flex:1 1 140px; border:1.5px solid var(--border); background:var(--surface-2); color:var(--text); font:inherit; font-weight:700; font-size:13.5px; padding:13px 10px; border-radius:12px; cursor:pointer; text-align:left; transition:.15s;}
+.topic-btn span.sub{display:block; font-weight:500; font-size:11.5px; color:var(--muted); margin-top:2px;}
+.topic-btn.active{background:var(--primary); border-color:var(--primary); color:#fff;}
+.topic-btn.active span.sub{color:#cfe0ff;}
+.topic-btn:focus-visible{outline:2px solid var(--primary-2); outline-offset:2px;}
+.pool-note{font-size:12px; color:var(--muted); margin:-6px 0 14px;}
+.count-row{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;}
+.count-btn{flex:1 1 70px; border:1.5px solid var(--border); background:var(--surface-2); color:var(--text); font:inherit; font-weight:700; font-size:15px; padding:11px 8px; border-radius:12px; cursor:pointer; font-family:"IBM Plex Mono",monospace;}
+.count-btn.active{background:var(--primary); border-color:var(--primary); color:#fff;}
+.count-btn:focus-visible{outline:2px solid var(--primary-2); outline-offset:2px;}
+.gen-btn{width:100%; border:none; background:var(--accent); color:#271c00; font:inherit; font-weight:800; font-size:15px; padding:13px; border-radius:12px; cursor:pointer; letter-spacing:.01em;}
+.gen-btn:hover{filter:brightness(1.05);}
+.gen-btn:focus-visible{outline:2px solid var(--primary-2); outline-offset:2px;}
+
+.score-bar{position:sticky; top:calc(env(safe-area-inset-top,0px) + 54px); z-index:4; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; background:var(--primary); color:#fff; border-radius:13px; padding:10px 14px; margin-bottom:16px; box-shadow:var(--shadow); font-family:"IBM Plex Mono",monospace; font-size:13px; font-variant-numeric:tabular-nums;}
+.score-bar b{font-size:15px;}
+.score-bar .pct{color:var(--accent); font-weight:700;}
+.score-bar .sb-left{display:flex; flex-wrap:wrap; gap:12px;}
+.done-btn{border:1.5px solid rgba(255,255,255,.55); background:rgba(255,255,255,.1); color:#fff; font:inherit; font-weight:700; font-size:12.5px; padding:7px 13px; border-radius:999px; cursor:pointer; letter-spacing:.02em;}
+.done-btn:hover{background:rgba(255,255,255,.2);}
+.done-btn:focus-visible{outline:2px solid #fff; outline-offset:2px;}
+
+/* ---- Result modal ---- */
+.modal-overlay{position:fixed; inset:0; z-index:50; background:rgba(15,18,26,.55); display:flex; align-items:center; justify-content:center; padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));}
+.modal-card{position:relative; width:min(380px,100%); background:var(--success-bg); border:1.5px solid var(--success-border); border-radius:20px; padding:30px 24px 26px; text-align:center; box-shadow:0 20px 60px -15px rgba(0,0,0,.45); overflow:hidden; animation:pop-in .38s cubic-bezier(.26,1.4,.4,1);}
+@media (prefers-reduced-motion:reduce){.modal-card{animation:none;}}
+@keyframes pop-in{0%{transform:scale(.75) translateY(10px); opacity:0;}100%{transform:scale(1) translateY(0); opacity:1;}}
+.modal-card .trophy{font-size:44px; display:block; margin-bottom:6px;}
+.modal-card h3{font-family:"Lora",serif; font-size:21px; color:var(--success); margin-bottom:4px;}
+.modal-card .score-big{font-family:"IBM Plex Mono",monospace; font-size:40px; font-weight:700; color:var(--text); margin:10px 0 2px; font-variant-numeric:tabular-nums;}
+.modal-card .score-sub{color:var(--muted); font-size:13px; margin-bottom:6px;}
+.modal-card .msg{font-size:14px; color:var(--text); margin:10px 0 20px;}
+.modal-actions{display:flex; gap:8px; flex-wrap:wrap;}
+.modal-actions button{flex:1 1 120px; border-radius:11px; padding:11px; font:inherit; font-weight:700; font-size:13.5px; cursor:pointer;}
+.modal-btn-primary{border:none; background:var(--success); color:#fff;}
+.modal-btn-ghost{border:1.5px solid var(--border); background:var(--surface); color:var(--text);}
+.confetti{position:absolute; top:-10px; width:8px; height:14px; border-radius:2px; animation:confetti-fall linear forwards; opacity:.9;}
+@media (prefers-reduced-motion:reduce){.confetti{display:none;}}
+@keyframes confetti-fall{0%{transform:translateY(-20px) rotate(0deg); opacity:1;}100%{transform:translateY(340px) rotate(540deg); opacity:0;}}
+
+.qcard{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px clamp(14px,4vw,24px) 20px; margin-bottom:14px; box-shadow:var(--shadow);}
+.qcard .meta{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:10px;}
+.tag{font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; padding:3px 9px; border-radius:999px; border:1px solid var(--border); color:var(--muted); background:var(--surface-2);}
+.tag.priority{background:var(--danger-bg); color:var(--danger); border-color:var(--danger-border);}
+.qcard .qnum{font-family:"IBM Plex Mono",monospace; color:var(--muted); font-size:12.5px;}
+.qcard .qtext{font-size:15.5px; font-weight:600; margin:2px 0 14px; color:var(--text);}
+.opt-list{display:flex; flex-direction:column; gap:8px;}
+.opt-btn{display:flex; gap:10px; align-items:flex-start; text-align:left; border:1.5px solid var(--border); background:var(--surface-2); color:var(--text); font:inherit; font-size:14px; padding:10px 13px; border-radius:11px; cursor:pointer; transition:.12s;}
+.opt-btn:hover:not(:disabled){border-color:var(--primary-2);}
+.opt-btn:focus-visible{outline:2px solid var(--primary-2); outline-offset:2px;}
+.opt-btn .letter{font-family:"IBM Plex Mono",monospace; font-weight:700; color:var(--muted); flex-shrink:0;}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.correct{background:var(--success-bg); border-color:var(--success-border); color:var(--text);}
+.opt-btn.correct .letter{color:var(--success);}
+.opt-btn.wrong{background:var(--danger-bg); border-color:var(--danger-border); color:var(--text);}
+.opt-btn.wrong .letter{color:var(--danger);}
+.opt-btn.dim{opacity:.55;}
+.explain{margin-top:13px; padding:12px 14px; border-radius:11px; background:var(--surface-2); border:1px solid var(--border); font-size:13.5px; color:var(--text);}
+.explain b{color:var(--primary-2); font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; display:block; margin-bottom:5px;}
+.empty-state{background:var(--surface); border:1px dashed var(--border); border-radius:16px; padding:34px 20px; text-align:center; color:var(--muted); font-size:14px;}
+.empty-state .big{font-size:30px; margin-bottom:8px;}
+.footer-note{text-align:center; color:var(--muted); font-size:12px; margin-top:22px;}
+</style>
+
+<div class="wrap">
+  <div class="app-header">
+    <span class="eyebrow">Persiapan UKOM &middot; JF Pengawas Keuangan Negara DJP</span>
+    <h1>UKOM Pajak DJP</h1>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" id="tab-ringkasan" onclick="switchTab('ringkasan')" role="tab" aria-selected="true">📚 Rangkuman Materi</button>
+    <button class="tab-btn" id="tab-latihan" onclick="switchTab('latihan')" role="tab" aria-selected="false">✏️ Latihan Soal</button>
+  </div>
+
+  <div id="view-ringkasan">
+    <div class="step-label"><span class="dot">·</span> Pilih Tema Materi</div>
+    <div class="topic-row" id="rangkuman-topic-row"></div>
+    <div class="bab-nav" id="bab-nav"></div>
+    <div class="content-card" id="bab-content"></div>
+  </div>
+
+  <div id="view-latihan" hidden>
+    <div class="quiz-setup">
+      <h2>Latihan Soal Pilihan Ganda</h2>
+      <p>Soal dari materi berprioritas tinggi (kotak merah) selalu didahulukan dan tidak pernah diulang sampai seluruh bank soal tema terpakai habis — setelahnya materi penting lain ikut disertakan agar pemahaman menyeluruh.</p>
+      <div class="step-label"><span class="dot">1</span> Pilih Tema</div>
+      <div class="topic-row" id="topic-row"></div>
+      <div id="quiz-step2" hidden>
+        <div class="step-label"><span class="dot">2</span> Pilih Level Kesulitan</div>
+        <div class="topic-row" id="level-row"></div>
+      </div>
+      <div id="quiz-step3" hidden>
+        <div class="step-label"><span class="dot">3</span> Pilih Jumlah Soal</div>
+        <div class="count-row" id="count-row"></div>
+        <p class="pool-note" id="pool-note"></p>
+        <button class="gen-btn" onclick="generateQuiz()">🎲 Acak Soal Baru</button>
+      </div>
+    </div>
+    <div id="score-bar-slot"></div>
+    <div id="quiz-list"></div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="result-modal" hidden>
+  <div class="modal-card" id="result-card">
+    <span class="trophy" id="result-trophy">🏆</span>
+    <h3 id="result-title">Latihan Selesai!</h3>
+    <div class="score-big" id="result-score">0/0</div>
+    <div class="score-sub" id="result-pct">0% benar</div>
+    <p class="msg" id="result-msg"></p>
+    <div class="modal-actions">
+      <button class="modal-btn-primary" onclick="closeResultModal(); generateQuiz();">🎲 Latihan Baru</button>
+      <button class="modal-btn-ghost" onclick="closeResultModal();">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================= DATA: RANGKUMAN PER BAB ============================= */
+const BAB = [
+{ title:"Kewenangan & Definisi Pemeriksaan", html:`
+<h3>Dasar Hukum</h3>
+<ul>
+<li>PMK 15 Tahun 2025 tentang Pemeriksaan Pajak</li>
+<li>PER-18/PJ/2025 tentang Tindak Lanjut atas Data Konkret</li>
+<li>SE-15/PJ/2018 tentang Kebijakan Pemeriksaan</li>
+</ul>
+<h3>Definisi Pemeriksaan</h3>
+<p>Serangkaian kegiatan menghimpun dan mengolah data, keterangan, dan/atau bukti yang dilaksanakan secara objektif dan profesional berdasarkan suatu standar pemeriksaan, untuk menguji kepatuhan pemenuhan kewajiban perpajakan dan/atau untuk tujuan lain dalam rangka melaksanakan ketentuan peraturan perundang-undangan perpajakan.</p>
+<div class="box box-danger"><strong>Dua Tujuan Pemeriksaan (Pasal 2)</strong><ul><li>Menguji kepatuhan pemenuhan kewajiban perpajakan</li><li>Tujuan lain dalam rangka melaksanakan ketentuan perpajakan</li></ul></div>
+<h3>Tipe Pemeriksaan</h3>
+<ul>
+<li><strong>Lengkap</strong> — mencakup seluruh pos dalam SPT dan/atau SPOP, diuji secara mendalam</li>
+<li><strong>Terfokus</strong> — satu atau beberapa pos dalam SPT/SPOP, diuji secara mendalam</li>
+<li><strong>Spesifik</strong> — satu atau beberapa pos dalam SPT/SPOP, diuji secara sederhana</li>
+</ul>
+<h3>Kriteria Pemeriksaan (Pasal 4)</h3>
+<p><strong>Menguji Kepatuhan</strong>, antara lain: SPT lebih bayar restitusi Pasal 17B KUP, SPT lebih bayar lainnya, SPT menyatakan rugi, perubahan tahun buku/metode pembukuan, penilaian kembali aktiva tetap, WP merger/pemekaran/likuidasi/pembubaran/meninggalkan Indonesia selamanya, PKP tidak menyerahkan BKP/JKP tetapi telah dikembalikan Pajak Masukan, WP terpilih berdasarkan analisis risiko kepatuhan, terdapat data konkret, serta kriteria khusus PBB (tidak menyampaikan SPOP, indikasi PBB lebih besar dari SPOP).</p>
+<p><strong>Tujuan Lain</strong>, antara lain: pemberian/penghapusan NPWP jabatan, pengukuhan/pencabutan PKP jabatan, pendaftaran objek PBB jabatan, penyelesaian keberatan, penentuan tempat terutang PPN, pencocokan data/alat keterangan, penyelesaian MAP dan kesepakatan harga transfer, pengujian fasilitas perpajakan, dan kriteria lainnya.</p>
+<div class="box box-danger"><strong>Data Konkret (PER-18/PJ/2025 Pasal 2 ayat 1)</strong><ul>
+<li>Faktur Pajak yang telah disetujui sistem DJP tetapi belum/tidak dilaporkan dalam SPT Masa PPN</li>
+<li>Bukti Potput PPh yang belum/tidak dilaporkan oleh penerbitnya dalam SPT Masa PPh</li>
+<li>Bukti transaksi/data perpajakan lain yang dapat digunakan menghitung kewajiban perpajakan WP, memerlukan pengujian sederhana</li>
+</ul></div>
+` },
+{ title:"Jangka Waktu & Standar Pemeriksaan", html:`
+<h3>Jangka Waktu Pengujian (Pasal 6)</h3>
+<div class="table-wrap"><table><tr><th>Tipe</th><th>Jangka Waktu Pengujian</th></tr>
+<tr><td>Lengkap</td><td class="num">5 bulan</td></tr>
+<tr><td>Terfokus</td><td class="num">3 bulan</td></tr>
+<tr><td>Spesifik</td><td class="num">1 bulan</td></tr>
+<tr><td>Data Konkret</td><td class="num">10 hari kerja</td></tr>
+</table></div>
+<div class="box box-danger"><strong>Perlu Diingat</strong><p>Jangka waktu pengujian dapat diperpanjang 4 bulan khusus untuk WP Grup/WP dengan transaksi Transfer Pricing. Dihitung sejak Surat Pemberitahuan Pemeriksaan disampaikan kepada WP, wakil, kuasa, pegawai, atau anggota keluarga dewasa dari WP.</p></div>
+<h3>Setelah SPHP</h3>
+<ul><li>SPHP disampaikan paling lama <strong>5 hari kerja</strong> setelah berakhirnya pengujian</li>
+<li>Tanggapan WP atas SPHP paling lama <strong>10 hari kerja</strong></li>
+<li>Jangka waktu Pembahasan Akhir Hasil Pemeriksaan (PAHP) dan pelaporan paling lama <strong>30 hari kerja</strong></li></ul>
+<h3>Pemeriksaan Tujuan Lain</h3>
+<p>Jangka waktu paling lama <strong>4 bulan</strong>, terhitung sejak Surat Pemberitahuan Pemeriksaan disampaikan sampai dengan tanggal LHP.</p>
+<h3>Catatan Pemeriksaan Spesifik</h3>
+<p>Pada tipe Spesifik, tidak dilakukan pertemuan (entry meeting) dan tidak dilakukan Pembahasan Temuan Sementara; hak dan kewajiban WP disampaikan bersama Surat Pemberitahuan Pemeriksaan.</p>
+<h3>Standar Pemeriksaan</h3>
+<ul>
+<li><strong>Standar Umum</strong> — Pemeriksa memiliki pendidikan/keterampilan teknis, integritas, dan independensi</li>
+<li><strong>Standar Pelaksanaan</strong> — persiapan sesuai tujuan, pengujian berdasarkan metode/teknik, temuan berdasar bukti kuat, dilaksanakan di kantor DJP/lokasi WP, didokumentasikan dalam Kertas Kerja Pemeriksaan (KKP)</li>
+<li><strong>Standar Pelaporan</strong> — LHP disusun dari KKP, memuat pelaksanaan, simpulan, dan usulan Pemeriksa</li>
+</ul>
+<h3>Metode Pemeriksaan</h3>
+<p><strong>Metode Langsung</strong> — menguji pos-pos secara langsung terhadap buku, catatan, dan dokumen.<br><strong>Metode Tidak Langsung</strong> — digunakan bila metode langsung tidak dapat diterapkan, melalui 6 pendekatan: transaksi tunai &amp; bank, sumber dan penggunaan dana, penghitungan rasio, satuan/volume, penghitungan biaya hidup, dan pertambahan kekayaan bersih.</p>
+` },
+{ title:"Tata Cara, Hak & Kewajiban Pemeriksaan", html:`
+<h3>Alur Proses Pemeriksaan</h3>
+<p>SP2 (Surat Perintah Pemeriksaan) → S. Pemberitahuan Pemeriksaan → pertemuan (entry meeting, kecuali Spesifik) → pinjam/minta buku-catatan-dokumen → minta data/informasi/keterangan → (Pembahasan Temuan Sementara jika ada) → SPHP → tanggapan WP → PAHP → Risalah/Ikhtisar/Berita Acara → KKP → LHP → ketetapan pajak.</p>
+<div class="box box-danger"><strong>Kewajiban WP yang Diperiksa (Pasal 13 ayat 3 PP 50/2022)</strong><ul>
+<li>Memperlihatkan dan/atau meminjamkan buku, catatan, atau dokumen yang menjadi dasar pembukuan/pencatatan dan dokumen lain yang berhubungan dengan penghasilan, kegiatan usaha, pekerjaan bebas WP, atau objek yang terutang pajak</li>
+<li>Memberikan kesempatan memasuki tempat/ruang yang dipandang perlu serta membantu kelancaran pemeriksaan</li>
+<li>Memberikan data, informasi, dan keterangan lain yang diperlukan</li>
+</ul></div>
+<div class="box box-danger"><strong>Penghitungan PKP Secara Jabatan (Pasal 31 ayat 3 UU KUP)</strong><p>Jika WP badan/OP yang menjalankan usaha tidak memenuhi kewajibannya sehingga Penghasilan Kena Pajak tidak dapat dihitung, maka PKP dapat dihitung secara jabatan. Dirjen Pajak tetap wajib menyampaikan SPHP dan memberikan hak WP untuk hadir dalam PAHP; dokumen yang dipertimbangkan terbatas pada dokumen terkait peredaran usaha/penghasilan bruto dan kredit pajak.</p></div>
+<div class="box box-danger"><strong>Peniadaan Kewajiban Merahasiakan (Pasal 29 ayat 4 UU KUP)</strong><p>Kewajiban merahasiakan pembukuan, pencatatan, atau dokumen serta keterangan WP ditiadakan oleh permintaan untuk keperluan pemeriksaan — mencegah dalih WP bahwa data terikat kerahasiaan.</p></div>
+<div class="box box-danger"><strong>Penyegelan (Pasal 30 ayat 1 UU KUP)</strong><p>Merupakan upaya terakhir pemeriksa untuk mengamankan buku, catatan, dokumen (termasuk data elektronik) dan benda bergerak/tidak bergerak lain, dilakukan jika WP tidak berada di tempat atau sengaja tidak memberi kesempatan pemeriksa masuk. Penyegelan data elektronik tetap mempertimbangkan kelangsungan operasional perusahaan, khususnya untuk kepentingan masyarakat.</p></div>
+<h3>Pemeriksaan Ulang</h3>
+<p>Dilakukan berdasarkan instruksi/persetujuan Direktur Jenderal Pajak terhadap <strong>data baru</strong> (data yang semula belum terungkap pada saat penetapan semula, baik di SPT, lampirannya, maupun pembukuan).</p>
+<div class="table-wrap"><table><tr><th>Hasil Pemeriksaan Ulang</th><th>Konsekuensi</th></tr>
+<tr><td>SKPKBT</td><td>Ada tambahan jumlah pajak dari ketetapan sebelumnya</td></tr>
+<tr><td>LHP Sumir</td><td>Tidak ada tambahan jumlah pajak</td></tr>
+<tr><td>Keputusan Rugi Fiskal</td><td>Tidak ada tambahan pajak, namun ada perubahan jumlah rugi fiskal</td></tr>
+</table></div>
+<h3>Pengungkapan Ketidakbenaran Pengisian SPT (Pasal 8 ayat 4 UU KUP)</h3>
+<p>Walaupun telah dilakukan pemeriksaan, selama Dirjen Pajak belum menyampaikan SPHP, WP dapat mengungkapkan ketidakbenaran pengisian SPT dalam laporan tersendiri; pemeriksaan tetap dilanjutkan sampai selesai dan SSP pengungkapan menjadi kredit atas SKP.</p>
+` },
+{ title:"Pembukuan & Pencatatan", html:`
+<h3>Definisi (Pasal 1 angka 29, Pasal 28 UU KUP)</h3>
+<p><strong>Pembukuan</strong> — proses pencatatan teratur untuk mengumpulkan data dan informasi keuangan meliputi harta, kewajiban, modal, penghasilan, biaya, serta harga perolehan dan penyerahan barang/jasa, ditutup dengan menyusun laporan keuangan (neraca dan laporan laba rugi).</p>
+<p><strong>Pencatatan</strong> — data yang dikumpulkan secara teratur tentang peredaran/penerimaan bruto dan/atau penghasilan bruto sebagai dasar menghitung pajak terutang, termasuk penghasilan bukan objek pajak dan/atau final.</p>
+<div class="box box-danger"><strong>Siapa Wajib Pembukuan?</strong><p>WP Orang Pribadi yang menjalankan usaha/pekerjaan bebas dan WP Badan wajib menyelenggarakan pembukuan, <em>kecuali</em>: (1) WP OP yang memilih menggunakan Norma Penghitungan Penghasilan Neto/NPPN karena peredaran bruto tidak melebihi Rp4,8 miliar setahun, (2) WP OP yang tidak menjalankan usaha/pekerjaan bebas, (3) WP OP kriteria tertentu berdasarkan peredaran bruto sesuai PMK 54/PMK.03/2021.</p></div>
+<h3>Ketentuan Pembukuan vs Pencatatan</h3>
+<ul>
+<li>Sama-sama harus: iktikad baik dan mencerminkan keadaan sebenarnya</li>
+<li>Pembukuan: diselenggarakan di Indonesia, huruf Latin, angka Arab, mata uang Rupiah (atau bahasa/mata uang asing dengan izin Menteri Keuangan), taat asas dengan stelsel akrual/kas, berdasarkan Standar Akuntansi Keuangan</li>
+<li>Pencatatan: disusun secara kronologis dan sistematis</li>
+</ul>
+<h3>Penyimpanan Dokumen</h3>
+<p>Buku, catatan, dokumen dasar pembukuan/pencatatan (termasuk hasil pengolahan data elektronik) wajib disimpan selama <strong>10 tahun</strong> di Indonesia, di tempat kegiatan/tinggal WP OP atau tempat kedudukan WP Badan.</p>
+` },
+{ title:"Penetapan & Ketetapan Pajak", html:`
+<h3>Prinsip Self-Assessment (Pasal 12 UU KUP)</h3>
+<p>Jumlah pajak terutang menurut SPT yang disampaikan WP dianggap benar, sepanjang Dirjen Pajak tidak dapat membuktikan atau tidak memiliki data bahwa jumlah tersebut tidak benar.</p>
+<h3>Jenis Surat Ketetapan Pajak</h3>
+<div class="table-wrap"><table><tr><th>Jenis</th><th>Berdasarkan</th></tr>
+<tr><td>SKPKB</td><td>Hasil Pemeriksaan</td></tr>
+<tr><td>SKPKBT</td><td>Hasil Pemeriksaan Ulang</td></tr>
+<tr><td>SKPLB</td><td>Hasil Pemeriksaan atau Penelitian</td></tr>
+<tr><td>SKPN</td><td>Hasil Pemeriksaan (kredit pajak = pajak terutang, atau tidak terutang &amp; tidak ada kredit/bayar)</td></tr>
+<tr><td>STP</td><td>Berbagai kondisi: PPh berjalan kurang bayar, salah tulis/hitung, denda/bunga, dsb.</td></tr>
+</table></div>
+<div class="box box-danger"><strong>Jangka Waktu Penerbitan (Pasal 13 &amp; 15 UU KUP)</strong><ul>
+<li><strong>SKPKB</strong> diterbitkan paling lama <strong>5 tahun</strong> setelah saat terutangnya pajak, berdasarkan hasil Pemeriksaan</li>
+<li><strong>SKPKBT</strong> diterbitkan paling lama <strong>5 tahun</strong> setelah saat terutangnya pajak, berdasarkan hasil Pemeriksaan Ulang karena data baru/belum terungkap</li>
+</ul></div>
+<div class="box box-danger"><strong>Ringkasan Sanksi Administratif (yang paling sering diuji)</strong>
+<div class="table-wrap"><table><tr><th>Pasal</th><th>Uraian</th><th>Sanksi</th></tr>
+<tr><td>13 (2)</td><td>Hasil pemeriksaan, pajak tidak/kurang dibayar</td><td class="num">Bunga acuan + 15%/12</td></tr>
+<tr><td>13 (3) c</td><td>Hasil pemeriksaan, PPN/PPnBM tidak/kurang dibayar</td><td class="num">Kenaikan 75%</td></tr>
+<tr><td>13 (3) d</td><td>PPh dipotong/dipungut tapi tidak/kurang disetor</td><td class="num">Kenaikan 75%</td></tr>
+<tr><td>15 (2)</td><td>SKPKBT (data baru dimiliki Dirjen Pajak)</td><td class="num">Kenaikan 100%</td></tr>
+<tr><td>15 (2)</td><td>SKPKBT (pengakuan tertulis WP atas kehendak sendiri)</td><td class="num">Tidak dikenakan</td></tr>
+<tr><td>7 (1)</td><td>Terlambat lapor SPT Masa PPN</td><td class="num">Denda Rp500.000</td></tr>
+<tr><td>7 (1)</td><td>Terlambat lapor SPT Masa lainnya</td><td class="num">Denda Rp100.000</td></tr>
+<tr><td>7 (1)</td><td>Terlambat lapor SPT Tahunan WP OP</td><td class="num">Denda Rp100.000</td></tr>
+<tr><td>7 (1)</td><td>Terlambat lapor SPT Tahunan WP Badan</td><td class="num">Denda Rp1.000.000</td></tr>
+</table></div>
+</div>
+` },
+{ title:"Upaya Hukum Perpajakan", html:`
+<h3>Dua Jalur Penyelesaian Sengketa</h3>
+<p><strong>Administratif (internal DJP)</strong>: Pembetulan (Pasal 16 KUP), Pengurangan/Pembatalan (Pasal 36 ayat 1 KUP), Prosedur Persetujuan Bersama/MAP (Pasal 27C KUP), dan Keberatan (Pasal 25 KUP).</p>
+<p><strong>Pengadilan</strong>: Banding dan Gugatan diproses di Pengadilan Pajak; Peninjauan Kembali (PK) diproses di Mahkamah Agung.</p>
+<div class="box box-danger"><strong>Keberatan</strong><ul>
+<li>Diajukan ke Dirjen Pajak dalam jangka waktu <strong>3 bulan</strong> sejak tanggal dikirim ketetapan</li>
+<li>Syarat: 1 keberatan untuk 1 jenis pajak &amp; 1 Masa/Tahun Pajak, tertulis dalam bahasa Indonesia, mencantumkan jumlah pajak versi WP, dan <strong>melunasi pajak yang masih harus dibayar paling sedikit sejumlah yang telah disetujui WP dalam Pembahasan Akhir Hasil Pemeriksaan</strong></li>
+<li>Jangka waktu penyelesaian oleh Dirjen Pajak paling lama <strong>12 bulan</strong></li>
+<li>Sanksi administratif jika ditolak/dikabulkan sebagian: denda <strong>30%</strong></li>
+</ul></div>
+<h3>Banding</h3>
+<ul>
+<li>Diajukan atas Surat Keputusan Keberatan ke Pengadilan Pajak, paling lama <strong>3 bulan</strong> sejak SK Keberatan diterima</li>
+<li>Pajak yang belum dibayar saat pengajuan banding belum menjadi pajak terutang sampai Putusan Banding terbit</li>
+<li>Sanksi denda jika ditolak/dikabulkan sebagian: <strong>60%</strong></li>
+<li>Putusan Banding berkekuatan hukum tetap (inkracht)</li>
+</ul>
+<h3>Gugatan</h3>
+<p>Objek Gugatan: pelaksanaan Surat Paksa/Surat Perintah Melaksanakan Penyitaan/Pengumuman Lelang, keputusan pencegahan penagihan, keputusan terkait keputusan perpajakan di luar Pasal 25/26, atau penerbitan ketetapan/SK Keberatan yang tidak sesuai prosedur. Jangka waktu: 14 hari (penagihan) atau 30 hari (objek lain) sejak diterima.</p>
+<h3>Peninjauan Kembali (PK)</h3>
+<p>Diajukan WP atau Dirjen Pajak ke Mahkamah Agung, maksimal 1 kali, atas dasar antara lain kebohongan/tipu muslihat, bukti tertulis baru, putusan mengabulkan lebih dari yang dituntut, atau putusan tidak sesuai peraturan. Sanksi denda jika ditolak: <strong>60%</strong>.</p>
+<h3>Prosedur Persetujuan Bersama (MAP)</h3>
+<p>Diajukan oleh: WP dalam negeri, Dirjen Pajak, pejabat berwenang negara mitra P3B, atau WNI (melalui Dirjen Pajak) terkait perlakuan diskriminatif — untuk mencegah/menyelesaikan masalah penerapan P3B.</p>
+<h3>Alat Bukti di Pengadilan Pajak</h3>
+<p>Majelis Hakim wajib mempertimbangkan minimal <strong>2 alat bukti</strong> yang sah: surat/tulisan, keterangan saksi, keterangan ahli, pengakuan para pihak, pengetahuan hakim, dan alat bukti elektronik.</p>
+` },
+{ title:"KUP Dasar: Pendaftaran, Pembayaran, SPT", html:`
+<h3>NPWP &amp; NIK</h3>
+<p>Sejak 14 Juli 2022, NIK digunakan sebagai NPWP bagi WP Orang Pribadi penduduk; WP badan, instansi pemerintah, dan OP bukan penduduk menggunakan NPWP format 16 digit. NITKU (Nomor Identitas Tempat Kegiatan Usaha) digunakan untuk setiap cabang/tempat kegiatan usaha.</p>
+<h3>Batas Waktu Pendaftaran</h3>
+<ul>
+<li>WP OP usaha/pekerjaan bebas: paling lama <strong>1 bulan</strong> setelah kegiatan mulai dilakukan</li>
+<li>WP OP tidak usaha, penghasilan ≥ PTKP: akhir bulan berikutnya</li>
+<li>WP Badan: paling lama <strong>1 bulan</strong> setelah pendirian</li>
+<li>Instansi Pemerintah: sebelum melakukan pemotongan/pemungutan</li>
+</ul>
+<div class="box box-danger"><strong>Batasan Pengusaha Kecil (PKP)</strong><p>Pengusaha dengan peredaran bruto dan/atau penerimaan bruto tidak lebih dari <strong>Rp4.800.000.000</strong> (Rp4,8 miliar) setahun tidak wajib dikukuhkan sebagai PKP, namun dapat memilih untuk dikukuhkan. Jika terlampaui, wajib melapor usaha paling lama akhir bulan berikutnya.</p></div>
+<h3>Jenis SPT</h3>
+<p>SPT Masa (PPh, PPN formulir 1111/1111DM/1107PUT, Bea Meterai) dan SPT Tahunan (PPh untuk 1 Tahun Pajak/Bagian Tahun Pajak).</p>
+<h3>Batas Waktu Penyampaian SPT</h3>
+<div class="table-wrap"><table><tr><th>Jenis</th><th>Batas Waktu</th></tr>
+<tr><td>SPT Masa PPh (umum)</td><td class="num">20 hari setelah Masa Pajak berakhir</td></tr>
+<tr><td>SPT Masa PPN</td><td class="num">Akhir bulan berikutnya</td></tr>
+<tr><td>SPT Tahunan PPh OP</td><td class="num">3 bulan setelah akhir Tahun Pajak</td></tr>
+<tr><td>SPT Tahunan PPh Badan</td><td class="num">4 bulan setelah akhir Tahun Pajak</td></tr>
+</table></div>
+<p>WP dapat memperpanjang penyampaian SPT Tahunan PPh paling lama <strong>2 bulan</strong>.</p>
+<h3>Pembetulan SPT</h3>
+<p>Dapat dilakukan sepanjang Dirjen Pajak belum melakukan pemeriksaan atau pemeriksaan bukti permulaan secara terbuka. Jika mengakibatkan utang pajak lebih besar, dikenai sanksi bunga Pasal 8 UU KUP (suku bunga acuan + 5%/12).</p>
+` },
+{ title:"Pajak Penghasilan (PPh)", html:`
+<h3>Subjek & Objek PPh</h3>
+<p>Subjek Pajak: Orang Pribadi, Badan, Warisan Belum Terbagi, dan Bentuk Usaha Tetap (BUT). Objek Pajak (Pasal 4 ayat 1 UU PPh): setiap tambahan kemampuan ekonomis yang diterima/diperoleh WP, berasal dari dalam/luar Indonesia, dapat dipakai untuk konsumsi atau menambah kekayaan.</p>
+<div class="box box-danger"><strong>PTKP (Penghasilan Tidak Kena Pajak)</strong>
+<div class="table-wrap"><table><tr><th>Komponen</th><th>Nilai</th></tr>
+<tr><td>Diri Wajib Pajak OP</td><td class="num">Rp54.000.000</td></tr>
+<tr><td>Tambahan WP kawin</td><td class="num">Rp4.500.000</td></tr>
+<tr><td>Tambahan istri digabung penghasilannya</td><td class="num">Rp54.000.000</td></tr>
+<tr><td>Tambahan per tanggungan (maks. 3 orang)</td><td class="num">Rp4.500.000</td></tr>
+</table></div>
+</div>
+<h3>Tarif PPh</h3>
+<ul>
+<li>WP OP: tarif progresif 5% / 15% / 25% / 30% / 35% (berlapis sesuai PKP)</li>
+<li>WP Badan: <strong>22%</strong>; fasilitas Pasal 31E berupa pengurangan tarif 50% untuk Badan dengan peredaran bruto sampai dengan <strong>Rp50 miliar</strong>, atas bagian PKP dari peredaran bruto s.d. Rp4,8 miliar</li>
+</ul>
+<div class="box box-danger"><strong>PPh Final UMKM (PP 55/2022, tarif 0,5%)</strong><ul>
+<li>Tarif <strong>0,5%</strong> dari peredaran bruto</li>
+<li>Khusus WP OP: bagian peredaran bruto s.d. <strong>Rp500 juta</strong> setahun <em>tidak dikenai PPh</em></li>
+<li>Jangka waktu pemanfaatan: WP OP <strong>7 Tahun Pajak</strong>; PT (termasuk Perseroan Perorangan) <strong>3–4 Tahun Pajak</strong>; CV/Firma/Koperasi/BUMDes <strong>4 Tahun Pajak</strong></li>
+<li>Batas subjek: peredaran bruto tidak melebihi Rp4,8 miliar setahun</li>
+</ul></div>
+<div class="box box-danger"><strong>Pengecualian Pajak atas Dividen (PMK 18/2021)</strong><p>Dividen dalam negeri diterima WP OP dalam negeri dikecualikan dari objek PPh apabila <strong>diinvestasikan kembali</strong> di NKRI sesuai bentuk/tata cara/jangka waktu investasi yang ditentukan, dan WP menyampaikan laporan realisasi investasi. Dividen WP Badan dalam negeri dikecualikan dari objek PPh dengan syarat kepemilikan saham dan sumber laba tertentu.</p></div>
+<h3>Lain-lain</h3>
+<ul>
+<li>Kompensasi kerugian fiskal dapat dikompensasikan 5 tahun berturut-turut</li>
+<li>NPPN (Norma Penghitungan Penghasilan Neto) digunakan WP OP dengan peredaran bruto &lt; Rp4,8 miliar yang memberitahukan penggunaannya dalam 3 bulan pertama Tahun Pajak</li>
+<li>Natura/kenikmatan tertentu (makan-minum seluruh pegawai, daerah tertentu, keharusan pekerjaan K3, sumber APBN/D/Desa, batasan nilai tertentu) dikecualikan dari objek PPh</li>
+</ul>
+` },
+{ title:"Pajak Pertambahan Nilai (PPN)", html:`
+<h3>Objek PPN (Pasal 4 ayat 1 UU PPN)</h3>
+<p>Penyerahan BKP/JKP di dalam Daerah Pabean, impor BKP, pemanfaatan BKP Tidak Berwujud/JKP dari luar Daerah Pabean, serta ekspor BKP berwujud/tidak berwujud/JKP. Termasuk objek khusus: Kegiatan Membangun Sendiri (Pasal 16C) dan penyerahan aktiva yang semula tidak diperjualbelikan (Pasal 16D).</p>
+<h3>Tarif &amp; Batasan Pengusaha Kecil</h3>
+<p>Tarif umum PPN <strong>11%</strong> (sejak 1 April 2022, dapat naik menjadi 12% sesuai UU HPP); tarif ekspor <strong>0%</strong>. Pengusaha dengan peredaran bruto tidak lebih dari <strong>Rp4,8 miliar</strong> termasuk kriteria Pengusaha Kecil (tidak wajib PKP).</p>
+<div class="box box-danger"><strong>PPN Kegiatan Membangun Sendiri (KMS)</strong><p>PPN KMS = <strong>20% x 11% x biaya pembangunan</strong> (tidak termasuk harga tanah). Syarat: luas bangunan minimal <strong>200 m²</strong>; disetor paling lama tanggal 15 bulan berikutnya.</p></div>
+<div class="box box-danger"><strong>Faktur Pajak: Dua Persyaratan Wajib</strong><ul>
+<li><strong>Formal</strong> — diisi secara benar, lengkap, dan jelas sesuai Pasal 13 ayat (5)/(6) UU PPN</li>
+<li><strong>Material</strong> — berisi keterangan yang sebenarnya/sesungguhnya mengenai transaksi</li>
+</ul>
+<p>Faktur Pajak yang dibuat melewati <strong>3 bulan</strong> sejak seharusnya dibuat dianggap tidak dibuat, sehingga PPN di dalamnya <em>tidak dapat dikreditkan</em>.</p></div>
+<h3>Pengkreditan Pajak Masukan</h3>
+<ul>
+<li>Pajak Masukan dikreditkan dengan Pajak Keluaran dalam Masa Pajak yang sama; jika belum dikreditkan, dapat dikreditkan pada Masa Pajak berikutnya paling lama <strong>3 Masa Pajak</strong> setelah berakhirnya Masa Pajak saat Faktur Pajak dibuat</li>
+<li>Sebelum dikukuhkan PKP: PM dapat dikreditkan dengan pedoman sebesar <strong>80%</strong> dari Pajak Keluaran yang seharusnya dipungut</li>
+<li>PM yang ditagih melalui ketetapan pajak dapat dikreditkan sebesar jumlah pokok PPN, dengan syarat telah dilunasi dan tidak ditempuh upaya hukum</li>
+</ul>
+<h3>DPP Nilai Lain (contoh)</h3>
+<div class="table-wrap"><table><tr><th>Jenis Penyerahan</th><th>DPP Nilai Lain</th></tr>
+<tr><td>Pemakaian sendiri/pemberian cuma-cuma</td><td>Harga Jual/Penggantian dikurangi laba kotor</td></tr>
+<tr><td>Penyerahan BKP pusat ke cabang</td><td>Harga pokok penjualan atau harga perolehan</td></tr>
+<tr><td>BKP melalui Juru Lelang</td><td>Harga Lelang</td></tr>
+</table></div>
+` },
+{ title:"Pajak Bumi dan Bangunan (PBB)", html:`
+<h3>Dasar Pengenaan</h3>
+<p>Dasar pengenaan PBB adalah <strong>Nilai Jual Objek Pajak (NJOP)</strong>, baik NJOP Bumi maupun NJOP Bangunan, ditetapkan melalui penilaian oleh Penilai Pajak (PMK-186/PMK.03/2019 j.o. PMK-234/PMK.03/2022).</p>
+<h3>Objek Pajak PBB Sektor P5L</h3>
+<p>Perkebunan, Perhutanan, Pertambangan Minyak &amp; Gas Bumi, Pertambangan Panas Bumi, Pertambangan Mineral/Batubara, dan Sektor Lainnya (perikanan, jaringan pipa/kabel, ruas jalan tol, fasilitas penyimpanan &amp; pengolahan).</p>
+<h3>Siklus Pelaporan SPOP</h3>
+<ul>
+<li>WP wajib mendaftarkan diri paling lama <strong>1 bulan</strong> setelah terpenuhinya persyaratan subjektif, memperoleh Surat Keterangan Terdaftar Objek Pajak PBB (NOP)</li>
+<li>SPOP disampaikan paling lama <strong>30 hari</strong> sejak tanggal diterimanya; dapat ditunda tambahan 7 hari</li>
+<li>Jika tidak disampaikan, diterbitkan Surat Teguran; jika tetap tidak ditanggapi, menjadi bahan analisis risiko usulan Pemeriksaan</li>
+</ul>
+<h3>Penetapan & Ketetapan</h3>
+<p>SPPT diterbitkan berdasarkan SPOP; SKP PBB diterbitkan paling lama <strong>5 tahun</strong> setelah berakhirnya Tahun Pajak PBB terutang. Jatuh tempo pelunasan SPPT: paling lama <strong>6 bulan</strong> sejak tanggal diterima; jika terlambat, diterbitkan STP PBB.</p>
+` },
+{ title:"PSIAP / Coretax (PMK 81/2024)", html:`
+<h3>Apa itu PSIAP?</h3>
+<p>Pembaruan Sistem Inti Administrasi Perpajakan (PSIAP), diwujudkan melalui sistem <strong>Coretax</strong>, mulai berlaku penuh 1 Januari 2025, menggantikan berbagai ketentuan administrasi lama (PMK 147/2017, PMK 48/2017, PMK 242 &amp; 243/2014, PMK 187/2015, PMK 244/2014, dll).</p>
+<h3>Hak & Kewajiban Elektronik</h3>
+<ul>
+<li>Pelaksanaan hak/kewajiban perpajakan dapat dilakukan secara elektronik melalui Portal Wajib Pajak, atau secara tertulis dalam kondisi tertentu (infrastruktur belum tersedia, gangguan komunikasi, bencana)</li>
+<li>Penandatanganan dokumen elektronik menggunakan <strong>TTE Tersertifikasi</strong> (opsional, dari PSrE) atau <strong>Kode Otorisasi DJP</strong> (diterbitkan saat Aktivasi Akun WP)</li>
+</ul>
+<div class="box box-danger"><strong>Perubahan Kunci Pengukuhan PKP (PMK-164/2023)</strong><p>Berbeda dari aturan lama (saat terbit SPPKP = saat mulai kewajiban/hak PKP), kini WP <strong>dapat memilih</strong> saat dimulainya kewajiban pungut-setor-lapor PPN/PPnBM melalui pemberitahuan Masa Pajak, paling lambat Masa Pajak pertama tahun buku berikutnya setelah batas waktu wajib lapor PKP.</p></div>
+<h3>Pengembalian Kelebihan Pajak &amp; Imbalan Bunga</h3>
+<p>Alur umum: SKPLB/SK/Putusan → SKPKPP → SPMKP/SPMIB → SP2D. Imbalan bunga diberikan a.l. atas keterlambatan pengembalian kelebihan bayar (Pasal 11 ayat 3 UU KUP) dan keterlambatan penerbitan SKPLB (Pasal 17B UU KUP).</p>
+` },
+{ title:"Pengawasan Kepatuhan Wajib Pajak", html:`
+<h3>Dasar Hukum &amp; Pemberlakuan</h3>
+<p>PMK 111 Tahun 2025 tentang Pengawasan Kepatuhan Wajib Pajak, dilengkapi SE-05/PJ/2022. Disusun berdasarkan amanat UU KUP (Pasal 10 ayat 2 dan Pasal 44E ayat 2), UU 12/2011 tentang Pembentukan Peraturan Perundang-undangan (Pasal 8), PMK 124/2024 tentang Organisasi Kemenkeu, dan Perpres 158/2024 tentang Kementerian Keuangan (Pasal 22 &amp; 362 — fungsi supervisi DJP).</p>
+<div class="box box-danger"><strong>Tanggal Berlaku</strong><p>PMK 111/2025 mulai berlaku <strong>1 Januari 2026</strong> (Pasal 30). Sejak tanggal tersebut, seluruh kegiatan Pengawasan dilaksanakan sesuai tata cara dalam PMK ini.</p></div>
+<h3>Kewenangan &amp; Ruang Lingkup (Pasal 2-3)</h3>
+<p>Dirjen Pajak berwenang melakukan Pengawasan untuk mewujudkan kepatuhan WP; kewenangan ini didelegasikan kepada Kepala KPP. Ruang lingkup Pengawasan terdiri atas 3 kelompok: <strong>WP Terdaftar</strong>, <strong>WP Belum Terdaftar</strong>, dan <strong>Pengawasan Wilayah</strong> — mencakup PPh, PPN, PPnBM, Bea Meterai, PBB, Pajak Penjualan, Pajak Karbon, dan pajak lain yang diadministrasikan DJP.</p>
+<h3>Tiga Bentuk Pengawasan WP Terdaftar (Pasal 5-14)</h3>
+<div class="table-wrap"><table><tr><th>Instrumen</th><th>Diterbitkan Dalam Hal</th><th>Dokumen Penutup</th></tr>
+<tr><td><strong>SP2DK</strong> (Permintaan Penjelasan)</td><td>Enam area: pengukuhan PKP, pembayaran/penyetoran, pelaporan, angsuran tahun berjalan, layanan/fasilitas perpajakan, kewajiban formal lainnya</td><td>SP3-P2DK (Surat Pemberitahuan Perkembangan Pelaksanaan P2DK)</td></tr>
+<tr><td><strong>Surat Imbauan</strong></td><td>Area sama dengan SP2DK (pembinaan bersifat persuasif)</td><td>Berita Acara hasil imbauan</td></tr>
+<tr><td><strong>Surat Teguran</strong></td><td>Khusus: SPT tidak disampaikan sesuai batas waktu, atau pelaksanaan ketentuan perpajakan lain</td><td>Berita Acara, dapat ditindaklanjuti Kunjungan/Pembahasan</td></tr>
+</table></div>
+<div class="box box-danger"><strong>Perbedaan Penting: SP2DK WP Terdaftar vs WP Belum Terdaftar</strong><ul>
+<li><strong>WP Terdaftar</strong> (1 Step): Surat Perintah Pengawasan → SP2DK → Tanggapan WP (14+7 hari) → (Undangan Pembahasan) → BAP2DK → ditutup dengan <strong>SP3-P2DK</strong></li>
+<li><strong>WP Belum Terdaftar</strong> (2 Step): Surat Perintah Pengawasan → SP2DK → Tanggapan WP (14+7 hari) → <strong>SPHPP</strong> (Surat Pemberitahuan Hasil Pengujian/Pengawasan) → Undangan Pembahasan → BAP2DK → LHP2DK</li>
+</ul></div>
+<h3>Saluran Penyampaian</h3>
+<p>SP2DK/Imbauan/Teguran untuk <strong>WP Terdaftar</strong> dapat disampaikan melalui 5 kanal: Akun WP, pos elektronik, pos/ekspedisi/kurir, faksimile, atau langsung (dengan Berita Acara). Untuk <strong>WP Belum Terdaftar</strong>, hanya 3 kanal: Akun WP, pos/ekspedisi/kurir, atau langsung (tanpa pos elektronik/faksimile, karena identitas WP belum tentu tervalidasi di sistem).</p>
+<h3>Jangka Waktu Tanggapan</h3>
+<p>WP diberi waktu <strong>14 hari kalender</strong> untuk menanggapi SP2DK/Surat Imbauan, dapat diperpanjang <strong>7 hari</strong> jika pemberitahuan perpanjangan diterima KPP sebelum 14 hari berakhir. DJP dapat melakukan Pembahasan/Kunjungan jika: tanggapan tidak sesuai, terdapat data tambahan, atau WP tidak menanggapi.</p>
+<h3>Usulan Hasil Kegiatan</h3>
+<p><strong>Usulan hasil SP2DK WP Terdaftar</strong> (huruf a-q, 17 opsi) — mulai dari case closed, perubahan data/penghapusan NPWP/pengukuhan-pencabutan PKP secara jabatan, pendaftaran/perubahan objek PBB jabatan, pembatasan layanan publik, penilaian untuk tujuan perpajakan, pengamatan/intelijen, hingga <strong>usul Pemeriksaan dan Pemeriksaan Bukti Permulaan</strong>.<br><strong>Usulan hasil Surat Imbauan</strong> (huruf a-l, 12 opsi) — serupa namun tanpa opsi pemeriksaan/bukper, karena sifatnya pembinaan.<br><strong>Usulan Pengawasan Wilayah</strong> (huruf a-i) — penambahan/pemutakhiran basis data, pemberian NPWP jabatan, hingga meneruskan ke kegiatan Pengawasan WP Terdaftar/Belum Terdaftar.</p>
+<h3>Penugasan &amp; Kewajiban AR (Pasal 21-23)</h3>
+<p>Pengawasan dilakukan melalui <strong>penugasan</strong> (Surat Perintah Pengawasan kepada AR/pegawai DJP) atau <strong>secara otomatis</strong> melalui sistem administrasi DJP (contoh: surat teguran SPT otomatis). AR/pegawai DJP yang ditugaskan wajib memperlihatkan tanda pengenal dan Surat Perintah Pengawasan serta memberi penjelasan terkait kegiatan yang dilakukan; sebaliknya WP berhak memintanya.</p>
+<h3>Kegiatan Pendukung Pengawasan</h3>
+<p>Pengusulan penilaian untuk tujuan perpajakan, pembahasan dengan pihak internal DJP, permintaan data/keterangan ke pihak ketiga, dan kegiatan pendukung lain sesuai penugasan.</p>
+<h3>Dua Jenis Pengawasan menurut SE-05/PJ/2022</h3>
+<ul>
+<li><strong>Pengawasan Pembayaran Masa (PPM)</strong> — untuk kewajiban yang jatuh tempo di Tahun Pajak berjalan</li>
+<li><strong>Pengawasan Kepatuhan Material (PKM)</strong> — untuk kewajiban yang jatuh tempo sebelum Tahun Pajak berjalan</li>
+</ul>
+<p>Masing-masing terdiri dari Penelitian Kepatuhan Formal (PnKF) dan Penelitian Kepatuhan Material (PnKM).</p>
+` },
+{ title:"Analisis Potensi Pajak & Profiling WP", html:`
+<h3>Teknik Penggalian Potensi</h3>
+<p>Meliputi penelusuran harta kekayaan WP (uang tunai, persediaan, tabungan, piutang, deposito), kunjungan ke lokasi usaha, penghitungan jumlah pegawai, mekanisme penjualan, jenis usaha, durasi operasional, wawancara end-customer, hingga penelusuran media sosial.</p>
+<div class="box box-danger"><strong>8 Pendekatan Menghitung Ulang Omzet</strong><ul>
+<li>Transaksi tunai dan nontunai</li><li>Sumber dan penggunaan dana</li><li>Satuan dan/atau volume</li>
+<li>Penghitungan biaya hidup</li><li>Pertambahan kekayaan bersih</li><li>Berdasarkan SPT/hasil pemeriksaan tahun sebelumnya</li>
+<li>Proyeksi nilai ekonomi</li><li>Penghitungan rasio</li>
+</ul></div>
+<h3>Metode Biaya Hidup &amp; Kekayaan Bersih</h3>
+<p><strong>Biaya Hidup</strong>: jika WP tidak memiliki utang, penghasilannya minimal sama dengan biaya hidupnya (titik impas). <strong>Pertambahan Kekayaan Bersih</strong>: penghasilan dihitung dari penjumlahan pertambahan kekayaan bersih (selisih kekayaan awal dan akhir tahun) dengan biaya hidup.</p>
+<h3>Analisis Mandiri (SE-05/PJ/2022)</h3>
+<ul>
+<li><strong>Penyusutan</strong> — sering ditemukan penyusutan tidak sesuai golongan harta</li>
+<li><strong>Jembreng PPN</strong> — penyandingan SPT PPN dalam satu halaman untuk mendeteksi anomali kompensasi/setoran</li>
+<li><strong>Ekualisasi</strong> — logika dasar analisis kepatuhan material, contoh: Omzet PPN vs Omzet PPh Badan/OP, Biaya Gaji vs penghasilan di SPT PPh 21, Biaya Sewa vs pemotongan PPh 23/Final</li>
+</ul>
+<h3>Profiling Wajib Pajak</h3>
+<p>Profil WP memuat paling sedikit: identitas, kegiatan usaha, daftar keluarga/keterkaitan, profil risiko (CRM), riwayat pengawasan &amp; pemeriksaan, riwayat keberatan/banding, dan profil risiko ketertagihan. Langkah profiling: pengumpulan data → identitas WP → proses bisnis WP → kepatuhan formal → ekualisasi → jembreng SPT PPN → analisis laporan keuangan menyeluruh → pemanfaatan data eksternal.</p>
+<h3>KPDL (Kegiatan Pengumpulan Data Lapangan)</h3>
+<p>Jenis: berbasis kewilayahan, penugasan lapangan lainnya (tusi), non-tusi, dan eksternal (kerja sama pihak ketiga). Dilaksanakan minimal oleh <strong>2 orang pegawai</strong> pada hari dan jam kerja, dengan pakaian kerja, tanda pengenal, dan Surat Tugas.</p>
+` },
+{ title:"Transfer Pricing / PKKU (PMK 172/2023)", html:`
+<div class="box box-danger"><strong>Hubungan Istimewa (Pasal 2)</strong><p>Ditentukan oleh 3 faktor: <strong>kepemilikan modal</strong> (penyertaan langsung/tidak langsung minimal <strong>25%</strong>), <strong>penguasaan</strong> (manajemen/teknologi/keputusan manajerial bersama), dan <strong>hubungan keluarga sedarah/semenda</strong> dalam garis lurus/ke samping satu derajat.</p></div>
+<h3>Prinsip Kewajaran dan Kelaziman Usaha (PKKU)</h3>
+<p>Diterapkan untuk menentukan Harga Transfer wajar, dengan membandingkan kondisi dan indikator harga Transaksi yang Dipengaruhi Hubungan Istimewa dengan Transaksi Independen yang sebanding. Indikator harga dapat berupa harga transaksi, laba kotor, atau laba bersih operasi.</p>
+<h3>6 Tahapan Penerapan PKKU</h3>
+<ol style="padding-left:20px;">
+<li>Identifikasi Transaksi Dipengaruhi Hubungan Istimewa &amp; Pihak Afiliasi</li>
+<li>Analisis industri</li>
+<li>Identifikasi hubungan komersial/keuangan (analisis kondisi transaksi)</li>
+<li>Analisis kesebandingan</li>
+<li>Menentukan metode Penentuan Harga Transfer</li>
+<li>Menerapkan metode &amp; menentukan Harga Transfer wajar</li>
+</ol>
+<h3>5 Metode Penentuan Harga Transfer</h3>
+<div class="table-wrap"><table><tr><th>Metode</th><th>Cocok Untuk</th></tr>
+<tr><td>CUP (Comparable Uncontrolled Price)</td><td>Produk komoditas/barang-jasa dengan karakteristik sama</td></tr>
+<tr><td>Resale Price Method</td><td>Distributor/reseller tanpa risiko bisnis signifikan</td></tr>
+<tr><td>Cost Plus Method</td><td>Pabrikan/penyedia jasa tanpa risiko bisnis signifikan</td></tr>
+<tr><td>Profit Split Method</td><td>Para pihak berkontribusi unik &amp; saling menanggung risiko</td></tr>
+<tr><td>TNMM (Net Margin)</td><td>Membandingkan laba operasi bersih dengan pembanding</td></tr>
+</table></div>
+<p>CUP diutamakan bila keandalannya setara metode lain; pembanding internal diutamakan di atas eksternal bila kesebandingannya setara.</p>
+<h3>Tahapan Pendahuluan (Transaksi Tertentu)</h3>
+<p>Untuk transaksi jasa, harta tidak berwujud, pinjaman, transaksi keuangan lain, pengalihan harta, restrukturisasi usaha, dan kesepakatan kontribusi biaya — WP wajib membuktikan manfaat ekonomis riil sebelum PKKU diterapkan. Contoh biaya yang tidak boleh dibebankan: <em>shareholder activity</em> seperti biaya rapat pemegang saham entitas induk.</p>
+` },
+{ title:"Ekstensifikasi & WP Belum Terdaftar", html:`
+<h3>Alur Pengawasan WP Belum Terdaftar</h3>
+<p>Tim Ekstensifikasi (Kasi Pengawasan sebagai Supervisor, 1 AR/Kepala KP2KP sebagai Ketua, 1 AR sebagai Anggota) menyusun dan menyampaikan SP2DK → Wajib Pajak menanggapi dalam 14 hari (+7 hari perpanjangan) → Pembahasan → SPHPP → (jika masih ada potensi) Undangan Pembahasan Akhir → BA P2DK → LHP2DK.</p>
+<h3>Penyampaian SP2DK</h3>
+<p>Melalui Akun WP, pos/jasa ekspedisi/kurir ke alamat tempat tinggal/kedudukan, atau secara langsung kepada WP/wakil/kuasa/pegawai/anggota keluarga dewasa (dengan Berita Acara).</p>
+<h3>Simpulan Akhir BAP2DK</h3>
+<p>Dapat berupa: WP tidak ditemukan/meninggal/SPLN, tidak ada potensi pajak, WP tidak hadir pembahasan akhir, WP tidak mendaftar/aktivasi NIK, WP setuju/tidak setuju dengan nilai potensi, atau WP tidak memenuhi syarat subjektif/objektif.</p>
+<div class="box box-danger"><strong>Tindak Lanjut LHP2DK</strong><ul>
+<li><strong>Case closed</strong> — WP tidak ditemukan/meninggal/tidak memenuhi syarat/tidak ada potensi/telah patuh</li>
+<li><strong>Usul IDLP</strong> — WP memiliki indikasi tindak pidana perpajakan</li>
+<li><strong>Usul Pemeriksaan</strong> — masih terdapat potensi pajak yang belum dipenuhi</li>
+</ul></div>
+<h3>WP Non Aktif Terdapat Data (NATD)</h3>
+<p>Kriteria penetapan WP Non Aktif secara jabatan (PER-07/PJ/2025) antara lain: tidak lapor SPT 5 tahun berturut-turut, tidak dipotong/dipungut pihak ketiga 5 tahun berturut-turut, tidak membayar pajak 5 tahun berturut-turut, tidak ada tunggakan/upaya hukum, tidak sedang diperiksa/disidik, dan tidak mendapat fasilitas perpajakan. Ditindaklanjuti melalui Imbauan Massal (PMK 111/2025 memungkinkan pengawasan otomatis via sistem informasi).</p>
+` },
+{ title:"Ketentuan Terbaru: PP 20/2026", html:`
+<h3>Latar Belakang</h3>
+<p>PP 20 Tahun 2026 mengubah PP 55 Tahun 2022 tentang Penyesuaian Pengaturan di Bidang Pajak Penghasilan, dengan fokus pada dua area: larangan biaya suap/gratifikasi dan penyesuaian PPh Final UMKM (WP dengan Peredaran Bruto Tertentu/WP PBT).</p>
+<div class="box box-danger"><strong>Pasal 20A — Larangan Biaya Suap &amp; Gratifikasi</strong><p>Pengeluaran berupa pemberian suap, gratifikasi, dan/atau pemberian lain dengan nama dan bentuk apa pun sebagaimana dimaksud dalam ketentuan tindak pidana korupsi/suap — termasuk kepada pejabat publik asing — <strong>bukan merupakan biaya</strong> untuk mendapatkan, menagih, dan memelihara penghasilan (non-deductible), karena bertentangan dengan adat kebiasaan pedagang yang baik dan ketentuan anti-korupsi internasional.</p></div>
+<div class="box box-danger"><strong>Perubahan Pasal 58 — Penentuan Peredaran Bruto Subjek WP PBT</strong><p>Sebelumnya (PP 55/2022): peredaran bruto dihitung dari <em>seluruh</em> penghasilan usaha &amp; pekerjaan bebas (final maupun non-final, termasuk luar negeri). Kini (PP 20/2026): hanya dihitung dari peredaran bruto atas penghasilan usaha yang <strong>dikenai PPh Final 0,5%</strong> saja — penghasilan dari jasa pekerjaan bebas atau usaha dengan skema final lain dikeluarkan dari penghitungan batas subjek.</p></div>
+<h3>Perubahan Pasal 57 — Subjek &amp; Pengecualian</h3>
+<ul>
+<li>WP Badan yang dapat memakai PPh Final 0,5% dipersempit menjadi: Perseroan Perorangan (1 orang) dan Koperasi (sebelumnya juga mencakup CV, Firma, PT biasa, BUMDes)</li>
+<li>Ditambahkan pengecualian anti-penghindaran: PT Perorangan yang dibentuk oleh WP OP bertujuan memecah penghasilan jasa pekerjaan bebas agar dikenai tarif final 0,5%, tidak dapat menggunakan skema ini</li>
+</ul>
+<h3>Perubahan Pasal 59 — Penghapusan Jangka Waktu</h3>
+<p>Jangka waktu tertentu (7 tahun WP OP, 4 tahun PT Perorangan) <strong>dihapus</strong>; pemanfaatan berlaku sampai WP tidak lagi memenuhi kriteria subjek atau memilih tarif umum.</p>
+` },
+{ title:"Level Kemahiran & SKJ Manajerial", html:`
+<p class="pool-note" style="margin:-4px 0 14px;">Tema <strong>Mansoskul</strong> (Manajerial &amp; Sosial Kultural) terpisah dari materi teknis perpajakan — mengacu pada Permenpan 38/2017 tentang Standar Kompetensi Jabatan ASN.</p>
+<h3>Apa itu Kompetensi Manajerial &amp; Sosial Kultural?</h3>
+<p>Standar Kompetensi Jabatan (SKJ) merupakan persyaratan kompetensi minimal yang harus dimiliki ASN dalam menjalankan tugas jabatannya. Setiap pegawai wajib mengimplementasikan kompetensi manajerial dan sosial kultural sesuai standar kompetensi jabatannya masing-masing.</p>
+<div class="box box-danger"><strong>5 Level Kemahiran (Permenpan 38/2017)</strong>
+<div class="table-wrap"><table><tr><th>Level</th><th>Sebutan</th></tr>
+<tr><td>Level 1</td><td>Paham / dalam pengembangan</td></tr>
+<tr><td>Level 2</td><td>Dasar</td></tr>
+<tr><td>Level 3</td><td>Menengah</td></tr>
+<tr><td>Level 4</td><td>Mumpuni</td></tr>
+<tr><td>Level 5</td><td>Ahli</td></tr>
+</table></div>
+</div>
+<h3>SKJ Kompetensi Manajerial per Jenjang Jabatan Fungsional</h3>
+<div class="table-wrap"><table><tr><th>Kompetensi</th><th>Ahli Pertama</th><th>Ahli Muda</th><th>Ahli Madya</th><th>Ahli Utama</th></tr>
+<tr><td>Integritas</td><td class="num">2</td><td class="num">3</td><td class="num">4</td><td class="num">5</td></tr>
+<tr><td>Kerjasama</td><td class="num">2</td><td class="num">3</td><td class="num">4</td><td class="num">4</td></tr>
+<tr><td>Komunikasi</td><td class="num">2</td><td class="num">3</td><td class="num">4</td><td class="num">4</td></tr>
+<tr><td>Orientasi pada Hasil</td><td class="num">2</td><td class="num">3</td><td class="num">4</td><td class="num">4</td></tr>
+<tr><td>Pelayanan Publik</td><td class="num">2</td><td class="num">3</td><td class="num">4</td><td class="num">4</td></tr>
+<tr><td>Pengembangan Diri &amp; Orang Lain</td><td class="num">2</td><td class="num">3</td><td class="num">4</td><td class="num">4</td></tr>
+<tr><td>Mengelola Perubahan</td><td class="num">2</td><td class="num">3</td><td class="num">4</td><td class="num">4</td></tr>
+<tr><td>Pengambilan Keputusan</td><td class="num">2</td><td class="num">3</td><td class="num">4</td><td class="num">4</td></tr>
+<tr><td>Perekat Bangsa (Sosial Kultural)</td><td class="num">2</td><td class="num">3</td><td class="num">4</td><td class="num">5</td></tr>
+</table></div>
+<div class="box box-danger"><strong>Perhatikan</strong><p>Dari 9 kompetensi, hanya <strong>Integritas</strong> dan <strong>Perekat Bangsa</strong> yang levelnya terus naik hingga <strong>Level 5</strong> di jenjang Ahli Utama. Tujuh kompetensi manajerial lainnya mentok di <strong>Level 4</strong> meski sudah menjadi Ahli Utama.</p></div>
+` },
+{ title:"8 Kompetensi Manajerial ASN", html:`
+<p>Berikut definisi inti dan contoh indikator perilaku kunci (umumnya Level 2-3, yang paling relevan bagi pelaksana/pengawas hingga administrator) dari 8 kompetensi manajerial.</p>
+<h3>1. Integritas</h3>
+<p>Konsisten berperilaku selaras dengan nilai, norma, dan/atau etika organisasi; jujur dalam hubungan dengan manajemen, rekan kerja, dan pemangku kepentingan.</p>
+<p><em>Level 2:</em> mampu mengingatkan dan mengajak rekan kerja bertindak sesuai nilai/norma/etika organisasi. <em>Level 3:</em> memastikan dan menanamkan keyakinan bersama agar anggota yang dipimpin bertindak sesuai nilai, norma, dan etika organisasi dalam lingkup formal.</p>
+<h3>2. Kerjasama</h3>
+<p>Kemampuan menjalin, membina, mempertahankan hubungan kerja yang efektif, berkomitmen saling membantu, dan mengoptimalkan sumber daya untuk tujuan strategis organisasi.</p>
+<p><em>Level 2:</em> menumbuhkan tim kerja yang partisipatif dan efektif. <em>Level 3:</em> efektif membangun tim kerja untuk peningkatan kinerja organisasi (melihat kekuatan/kelemahan anggota, membentuk tim yang tepat).</p>
+<h3>3. Komunikasi</h3>
+<p>Kemampuan menerangkan pandangan/gagasan secara jelas dan sistematis, memastikan pemahaman, mendengarkan aktif, serta mempersuasi orang lain demi tujuan organisasi.</p>
+<p><em>Level 2:</em> bersedia mendengarkan orang lain, menyiapkan materi presentasi/laporan. <em>Level 3:</em> berkomunikasi secara asertif untuk menyampaikan informasi yang sensitif/rumit/kompleks.</p>
+<h3>4. Orientasi pada Hasil</h3>
+<p>Mempertahankan komitmen pribadi tinggi untuk menyelesaikan tugas, dapat diandalkan, serta mampu mengidentifikasi risiko dan peluang untuk keberhasilan organisasi.</p>
+<p><em>Level 2:</em> berupaya meningkatkan hasil kerja pribadi lebih tinggi dari standar, mencoba metode alternatif. <em>Level 3:</em> menetapkan target kerja menantang bagi unit kerja, memberi apresiasi dan teguran untuk mendorong kinerja.</p>
+<h3>5. Pelayanan Publik</h3>
+<p>Melaksanakan tugas pemerintahan dan pelayanan publik secara profesional, transparan, objektif, netral, tidak memihak, dan tidak diskriminatif.</p>
+<p><em>Level 2:</em> mampu menjelaskan proses pelaksanaan tugas secara transparan. <em>Level 3:</em> mampu memanfaatkan kekuatan kelompok serta memperbaiki standar pelayanan publik di lingkup unit kerja.</p>
+<h3>6. Pengembangan Diri &amp; Orang Lain</h3>
+<p>Meningkatkan pengetahuan/keterampilan diri; menginspirasi dan membimbing orang lain mengembangkan potensinya serta mendorong kemauan belajar sepanjang hayat.</p>
+<p><em>Level 2:</em> meningkatkan kemampuan bawahan dengan memberi contoh dan penjelasan cara melaksanakan pekerjaan. <em>Level 3:</em> memberikan umpan balik dan membimbing bawahan melalui tugas-tugas yang menantang.</p>
+<h3>7. Mengelola Perubahan</h3>
+<p>Menyesuaikan diri dengan situasi baru, tidak bergantung berlebihan pada metode lama, mengambil tindakan mendukung inisiatif perubahan, dan bertanggung jawab atas keberhasilan implementasinya.</p>
+<p><em>Level 2:</em> mengikuti perubahan secara mandiri. <em>Level 3:</em> membantu orang lain mengikuti perubahan serta mengantisipasi perubahan secara tepat.</p>
+<h3>8. Pengambilan Keputusan</h3>
+<p>Membuat keputusan tepat waktu dan percaya diri setelah mempertimbangkan prinsip kehati-hatian, dirumuskan sistematis berdasarkan informasi, alternatif, dan konsekuensinya.</p>
+<p><em>Level 2:</em> menganalisis masalah secara mendalam sebelum menyimpulkan. <em>Level 3:</em> membandingkan berbagai alternatif serta menyeimbangkan risiko dan keberhasilan implementasi.</p>
+` },
+{ title:"Kompetensi Sosial Kultural & Nilai Kemenkeu", html:`
+<h3>Kompetensi Sosial Kultural: Perekat Bangsa</h3>
+<p>Kompetensi Sosial Kultural adalah pengetahuan, keterampilan, dan sikap/perilaku terkait pengalaman berinteraksi dengan masyarakat majemuk (keberagaman agama/kepercayaan, suku &amp; budaya, gender, sosial ekonomi, preferensi politik, dan wawasan kebangsaan).</p>
+<div class="box box-danger"><strong>Nama Kompetensi: Perekat Bangsa</strong><p>Kemampuan pegawai untuk: peka terhadap perbedaan individu/kelompok masyarakat, mempromosikan sikap toleransi dan keterbukaan, membangun hubungan sosial-psikologis dengan masyarakat di tengah kemajemukan Indonesia, serta menjadi perpanjangan tangan pemerintah dalam mempersatukan masyarakat.</p></div>
+<h3>SKJ Kompetensi Sosial Kultural per Jenjang Jabatan</h3>
+<div class="table-wrap"><table><tr><th>Level</th><th>Jenjang Jabatan</th><th>Deskripsi</th></tr>
+<tr><td>1 (Paham)</td><td>Pelaksana, JF Pemula</td><td>Peka, memahami, dan menerima kemajemukan</td></tr>
+<tr><td>2 (Dasar)</td><td>Jabatan Pengawas, JF Pertama/Mahir/Terampil</td><td>Aktif mengembangkan sikap saling menghargai, menekankan persamaan dan persatuan</td></tr>
+<tr><td>3 (Menengah)</td><td>Jabatan Administrator, JF Penyelia/Muda</td><td>Mempromosikan dan mengembangkan sikap toleransi dan persatuan</td></tr>
+<tr><td>4 (Mumpuni)</td><td>JPT Pratama, JF Madya</td><td>Mendayagunakan perbedaan secara konstruktif dan kreatif untuk organisasi</td></tr>
+<tr><td>5 (Ahli)</td><td>JPT Madya, JF Utama</td><td>Menjadi wakil pemerintah untuk membangun hubungan sosial-psikologis</td></tr>
+</table></div>
+<h3>5 Nilai Kemenkeu</h3>
+<p>Nilai-nilai Kemenkeu menjadi <em>way of life</em> dan pedoman utama bekerja, sejalan dengan Kode Etik, Kode Perilaku, dan Bela Negara. Sri Mulyani Indrawati menegaskan: <em>"Kemenkeu akan menjadi institusi yang living the values, not only printing the values."</em></p>
+<div class="box box-info"><strong>Integrity · Professionalism · Synergy · Service · Excellence</strong><ul>
+<li><strong>Integritas</strong> — bekerja dengan hati; peka dan berempati terhadap perbedaan, tenang menghadapi konflik; mengutamakan kepentingan bangsa di atas kepentingan pribadi</li>
+<li><strong>Profesionalisme</strong> — memiliki sangka baik, saling percaya dan menghormati; menghargai perbedaan politik, ras, agama, dan kondisi fisik</li>
+<li><strong>Sinergi</strong> — melayani dengan berorientasi pada kepuasan pemangku kepentingan secara kolaboratif</li>
+<li><strong>Pelayanan</strong> — mengembangkan inovasi dan kreativitas; terbuka terhadap informasi dan perbedaan baru</li>
+<li><strong>Kesempurnaan (Excellence)</strong> — menjaga martabat, menjunjung toleransi, bijak bermedia sosial, dan tidak melakukan perundungan (bullying)</li>
+</ul></div>
+<h3>Contoh Implementasi Keberagaman</h3>
+<p>Kegiatan sosial Kemenkeu: Kemenkeu Mengajar, Seminggu Bersama Keluarga Kemenkeu (SBKK). Kegiatan sosial di lingkungan masyarakat: menjadi ketua RT/RW, relawan kerja bakti, atau terlibat bantuan sosial (renovasi fasilitas umum/ibadah, dll).</p>
+` },
+{ title:"Assessment Center, Self-Assessment & Pengembangan Kompetensi", html:`
+<h3>Laporan Individual Assessment Center (LIAC)</h3>
+<p>LIAC adalah laporan hasil pengolahan data Assessment Center terhadap Assessee yang dibuat oleh Assessor, berdasarkan bukti perilaku yang diperoleh selama Pengambilan Data (Intake) dan hasil Assessor Meeting. LIAC digunakan untuk mengetahui skor JPMAC (beserta skor tiap level kompetensi) dan menentukan rencana pengembangan sesuai kebutuhan organisasi serta minat pegawai. LIAC dapat diakses melalui HRIS masing-masing pegawai (hris.e-prime.kemenkeu.go.id).</p>
+<h3>Self-Assessment (Penilaian Diri)</h3>
+<p>Teknik penilaian yang dilakukan individu untuk menggali, menemukan, dan mengemukakan kelebihan serta kekurangan dirinya, lalu menyikapi dan memperbaiki kekurangan serta menguatkan kelebihannya.</p>
+<div class="box box-danger"><strong>4 Tujuan Self-Assessment</strong><ul>
+<li>Individu dapat mengetahui gap kompetensi</li>
+<li>Individu dapat mengetahui cara menyelesaikan masalah (teknik dan strategi)</li>
+<li>Individu dapat mengukur kualitas pekerjaannya</li>
+<li>Individu dapat mengukur tingkat pencapaian kinerjanya</li>
+</ul></div>
+<h3>Langkah-Langkah Self-Assessment</h3>
+<p>Memahami Standar Kompetensi Jabatan (SKJ) → memahami definisi kompetensi dan indikatornya → mengidentifikasi evidence yang dimiliki dan membandingkannya dengan indikator perilaku pada kamus kompetensi (mempertimbangkan faktor "lack") → mengamati apakah indikator perilaku pada level SKJ tersebut terpenuhi, termasuk memastikan indikator pada level di bawahnya juga sudah terpenuhi.</p>
+<h3>3 Faktor Penyebab Gap Kompetensi</h3>
+<div class="table-wrap"><table><tr><th>Faktor</th><th>Penjelasan</th></tr>
+<tr><td>Lack of Opportunity</td><td>Tidak ada kesempatan atau tidak dituntut dalam tugasnya</td></tr>
+<tr><td>Lack of Knowledge</td><td>Belum memahami, relatif baru pada tugasnya</td></tr>
+<tr><td>Lack of Motivation</td><td>Hambatan personal</td></tr>
+</table></div>
+<h3>Model Pengembangan Kompetensi 70:20:10</h3>
+<p>Sesuai PMK 216/2018, pengembangan kompetensi pegawai mengikuti proporsi:</p>
+<div class="box box-danger"><strong>70:20:10 Learning Model</strong><ul>
+<li><strong>70% Experiential Learning</strong> — pembelajaran terintegrasi di tempat kerja melalui praktik langsung (contoh: assignment, secondment, job enlargement, job enrichment)</li>
+<li><strong>20% Social Learning</strong> — pembelajaran kolaboratif dalam komunitas/bimbingan (contoh: coaching, mentoring, benchmarking, Community of Practice, feedback, networking)</li>
+<li><strong>10% Formal Learning</strong> — pembelajaran terstruktur formal (contoh: diklat, self-study, e-learning, workshop)</li>
+</ul></div>
+` }
+];
+
+/* ============================= DATA: BANK SOAL ============================= */
+const QUESTIONS = [
+{bab:"BAB 1 - Kewenangan & Definisi Pemeriksaan",p:1,q:"Definisi Pemeriksaan menurut Pasal 1 PMK 15/2025 adalah serangkaian kegiatan menghimpun dan mengolah data, keterangan, dan/atau bukti secara objektif dan profesional berdasarkan standar pemeriksaan untuk...",o:["menguji kepatuhan pemenuhan kewajiban perpajakan dan/atau tujuan lain dalam rangka melaksanakan ketentuan perpajakan","menghitung besarnya pajak terutang semata tanpa dasar hukum lain","menetapkan sanksi administratif kepada WP secara langsung","mengumpulkan bukti permulaan tindak pidana perpajakan"],c:0,e:"Sesuai Pasal 1 PMK 15/2025, pemeriksaan memiliki dua tujuan: menguji kepatuhan dan tujuan lain dalam rangka melaksanakan ketentuan perpajakan. Pembuktian pidana adalah ranah pemeriksaan bukti permulaan, bukan pemeriksaan biasa."},
+{bab:"BAB 1 - Kewenangan & Definisi Pemeriksaan",p:0,q:"Pemeriksaan yang mencakup seluruh pos dalam SPT dan/atau SPOP secara mendalam disebut tipe pemeriksaan...",o:["Terfokus","Spesifik","Lengkap","Dakon"],c:2,e:"Pemeriksaan Lengkap menguji seluruh pos SPT/SPOP secara mendalam; Terfokus hanya satu/beberapa pos secara mendalam; Spesifik satu/beberapa pos secara sederhana."},
+{bab:"BAB 1 - Kewenangan & Definisi Pemeriksaan",p:0,q:"Pemeriksaan Terfokus menguji...",o:["seluruh pos secara mendalam","satu atau beberapa pos dalam SPT/SPOP secara mendalam","satu atau beberapa pos secara sederhana","seluruh pos secara sederhana"],c:1,e:"Terfokus menguji satu atau beberapa pos tertentu dalam SPT/SPOP secara mendalam, berbeda dengan Lengkap (seluruh pos) dan Spesifik (sederhana)."},
+{bab:"BAB 1 - Kewenangan & Definisi Pemeriksaan",p:1,q:"Manakah yang BUKAN merupakan kriteria pemeriksaan untuk menguji kepatuhan menurut Pasal 4 PMK 15/2025?",o:["SPT menyatakan lebih bayar dengan permohonan pengembalian Pasal 17B KUP","WP terpilih berdasarkan analisis risiko kepatuhan","Penyelesaian keberatan Wajib Pajak","WP melakukan penggabungan, peleburan, pemekaran, likuidasi, atau pembubaran usaha"],c:2,e:"Penyelesaian keberatan termasuk kriteria pemeriksaan untuk TUJUAN LAIN, bukan untuk menguji kepatuhan pemenuhan kewajiban perpajakan."},
+{bab:"BAB 1 - Kewenangan & Definisi Pemeriksaan",p:1,q:"Berikut yang TIDAK termasuk kategori Data Konkret sesuai PER-18/PJ/2025 adalah...",o:["Faktur Pajak yang disetujui sistem DJP tapi belum/tidak dilaporkan dalam SPT Masa PPN","Bukti potput PPh yang belum/tidak dilaporkan penerbitnya","Bukti transaksi/data perpajakan yang dapat digunakan menghitung kewajiban perpajakan WP","Hasil analisis risiko kepatuhan berbasis Compliance Risk Management (CRM)"],c:3,e:"CRM/analisis risiko merupakan dasar pemeriksaan khusus berbasis risiko (risk-based audit), bukan kategori data konkret menurut PER-18/PJ/2025."},
+{bab:"BAB 1 - Kewenangan & Definisi Pemeriksaan",p:0,q:"Pemeriksaan khusus berdasarkan analisis risiko disebut juga...",o:["audit based on data","risk-based audit","desk audit","field audit"],c:1,e:"Pemeriksaan khusus berdasarkan analisis risiko dikenal sebagai risk-based audit, berbeda dengan pemeriksaan berdasarkan data konkret (audit based on data)."},
+{bab:"BAB 1 - Kewenangan & Definisi Pemeriksaan",p:0,q:"Pemeriksaan Rutin adalah pemeriksaan yang dilakukan sehubungan dengan...",o:["indikasi ketidakpatuhan berdasarkan data konkret","hasil analisis risiko","pemenuhan hak dan/atau pelaksanaan kewajiban perpajakan WP","tindak pidana perpajakan"],c:2,e:"Pemeriksaan Rutin dilakukan sehubungan dengan pemenuhan hak dan/atau pelaksanaan kewajiban perpajakan WP, berbeda dari Pemeriksaan Khusus yang didasari data konkret atau analisis risiko."},
+{bab:"BAB 1 - Kewenangan & Definisi Pemeriksaan",p:0,q:"Direktur Jenderal Pajak dapat melimpahkan kewenangan administrasi pemeriksaan dalam bentuk...",o:["subdelegasi ke pihak swasta","delegasi kepada pejabat di lingkungan DJP","pengalihan penuh ke Pengadilan Pajak","outsourcing kepada konsultan pajak"],c:1,e:"Dirjen Pajak melimpahkan kewenangan administrasi pemeriksaan dalam bentuk delegasi kepada pejabat di lingkungan Direktorat Jenderal Pajak."},
+
+{bab:"BAB 2 - Jangka Waktu & Standar Pemeriksaan",p:1,q:"Jangka waktu pengujian untuk Pemeriksaan Lengkap paling lama adalah...",o:["1 bulan","3 bulan","5 bulan","10 hari kerja"],c:2,e:"Pemeriksaan Lengkap memiliki jangka waktu pengujian paling lama 5 bulan, karena mencakup seluruh pos SPT/SPOP secara mendalam."},
+{bab:"BAB 2 - Jangka Waktu & Standar Pemeriksaan",p:1,q:"Jangka waktu pengujian untuk Pemeriksaan Terfokus paling lama adalah...",o:["1 bulan","3 bulan","5 bulan","10 hari kerja"],c:1,e:"Pemeriksaan Terfokus memiliki jangka waktu pengujian paling lama 3 bulan."},
+{bab:"BAB 2 - Jangka Waktu & Standar Pemeriksaan",p:1,q:"Jangka waktu pengujian untuk Pemeriksaan Spesifik paling lama adalah...",o:["1 bulan","3 bulan","5 bulan","10 hari kerja"],c:0,e:"Pemeriksaan Spesifik memiliki jangka waktu pengujian paling lama 1 bulan, karena hanya menguji satu/beberapa pos secara sederhana."},
+{bab:"BAB 2 - Jangka Waktu & Standar Pemeriksaan",p:1,q:"Jangka waktu pengujian untuk pemeriksaan khusus berdasarkan data konkret paling lama adalah...",o:["1 bulan","10 hari kerja","3 bulan","4 bulan"],c:1,e:"Pemeriksaan berdasarkan data konkret memiliki jangka waktu pengujian paling lama 10 hari kerja, karena sifatnya pengujian sederhana atas data yang sudah konkret."},
+{bab:"BAB 2 - Jangka Waktu & Standar Pemeriksaan",p:1,q:"Jangka waktu pengujian dapat diperpanjang 4 bulan khusus untuk...",o:["seluruh jenis Wajib Pajak tanpa terkecuali","WP Grup/WP dengan transaksi Transfer Pricing","WP UMKM dengan omzet kecil","WP Instansi Pemerintah"],c:1,e:"Perpanjangan jangka waktu pengujian 4 bulan diberikan khusus untuk WP Grup atau WP dengan transaksi yang dipengaruhi hubungan istimewa (Transfer Pricing), mengingat kompleksitas analisisnya."},
+{bab:"BAB 2 - Jangka Waktu & Standar Pemeriksaan",p:0,q:"Jangka waktu Pembahasan Akhir Hasil Pemeriksaan (PAHP) dan pelaporan paling lama adalah...",o:["10 hari kerja","30 hari kerja","5 bulan","1 bulan"],c:1,e:"Terhitung sejak SPHP disampaikan, jangka waktu PAHP dan pelaporan paling lama 30 hari kerja, sedangkan tanggapan WP atas SPHP paling lama 10 hari kerja."},
+{bab:"BAB 2 - Jangka Waktu & Standar Pemeriksaan",p:0,q:"Pada Pemeriksaan Spesifik, hal berikut yang TIDAK dilakukan adalah...",o:["pertemuan (entry meeting) dan Pembahasan Temuan Sementara","penerbitan SPHP","penyampaian hak dan kewajiban bersama Surat Pemberitahuan Pemeriksaan","pelaporan LHP"],c:0,e:"Untuk Pemeriksaan Spesifik, tidak dilakukan pertemuan (entry meeting) maupun Pembahasan Temuan Sementara; hak dan kewajiban WP disampaikan bersama Surat Pemberitahuan Pemeriksaan."},
+{bab:"BAB 2 - Jangka Waktu & Standar Pemeriksaan",p:0,q:"Standar Pemeriksaan menurut PMK 15/2025 terdiri atas tiga standar, yaitu...",o:["Standar Umum, Standar Pelaksanaan, Standar Pelaporan","Standar Formal, Material, Administratif","Standar Teknik, Metode, Prosedur","Standar Input, Proses, Output"],c:0,e:"Standar Pemeriksaan mencakup Standar Umum (kompetensi dan integritas pemeriksa), Standar Pelaksanaan (persiapan hingga KKP), dan Standar Pelaporan (LHP dari KKP)."},
+
+{bab:"BAB 3 - Tata Cara, Hak & Kewajiban Pemeriksaan",p:1,q:"Sesuai Pasal 13 ayat (3) PP 50/2022, salah satu kewajiban WP yang diperiksa adalah memperlihatkan dan/atau meminjamkan...",o:["laporan keuangan auditor eksternal saja","buku, catatan, atau dokumen yang menjadi dasar pembukuan/pencatatan dan dokumen lain terkait penghasilan/objek pajak","hanya SPT Tahunan tahun berjalan","akta pendirian perusahaan saja"],c:1,e:"Kewajiban WP yang diperiksa mencakup memperlihatkan/meminjamkan buku, catatan, dokumen dasar pembukuan dan dokumen lain yang berhubungan dengan penghasilan, kegiatan usaha, atau objek pajak."},
+{bab:"BAB 3 - Tata Cara, Hak & Kewajiban Pemeriksaan",p:1,q:"Dalam hal WP badan/OP yang menjalankan usaha tidak memenuhi kewajibannya sehingga Penghasilan Kena Pajak tidak dapat dihitung, maka PKP dapat dihitung...",o:["secara estimasi oleh akuntan publik independen","secara jabatan sesuai ketentuan peraturan perundang-undangan","nol/nihil secara otomatis","berdasarkan rata-rata industri tanpa dasar hukum"],c:1,e:"Sesuai Pasal 31 ayat (3) UU KUP, penghasilan kena pajak dapat dihitung secara jabatan jika WP tidak memenuhi kewajibannya, namun hak WP untuk SPHP dan PAHP tetap diberikan."},
+{bab:"BAB 3 - Tata Cara, Hak & Kewajiban Pemeriksaan",p:1,q:"Menurut Pasal 29 ayat (4) UU KUP, kewajiban merahasiakan pembukuan/pencatatan/dokumen WP yang diperiksa menjadi...",o:["tetap berlaku penuh tanpa pengecualian","ditiadakan oleh permintaan untuk keperluan pemeriksaan","hanya berlaku untuk sektor perbankan","dialihkan tanggung jawabnya ke notaris"],c:1,e:"Pasal 29 ayat (4) UU KUP meniadakan kewajiban merahasiakan data demi keperluan pemeriksaan, untuk mencegah dalih WP bahwa data terikat kerahasiaan."},
+{bab:"BAB 3 - Tata Cara, Hak & Kewajiban Pemeriksaan",p:1,q:"Penyegelan dalam pemeriksaan pajak merupakan...",o:["tindakan pertama sebelum pemeriksaan dimulai","upaya terakhir pemeriksa untuk mengamankan buku, catatan, dokumen, dan barang lain","sanksi pidana administratif langsung","kewajiban rutin setiap pemeriksaan lapangan"],c:1,e:"Penyegelan (Pasal 30 ayat 1 UU KUP) adalah upaya terakhir pemeriksa, dilakukan jika WP tidak berada di tempat atau sengaja tidak memberi kesempatan pemeriksa masuk."},
+{bab:"BAB 3 - Tata Cara, Hak & Kewajiban Pemeriksaan",p:1,q:"Pemeriksaan Ulang terhadap WP yang sama hanya dapat dilakukan dalam hal ditemukan...",o:["kesalahan hitung sepihak oleh fiskus","data baru (data yang semula belum terungkap)","permintaan WP semata tanpa syarat lain","perubahan tarif pajak di tengah tahun"],c:1,e:"Pemeriksaan Ulang dilakukan atas instruksi/persetujuan Dirjen Pajak khusus terhadap data baru yang semula belum terungkap pada saat penetapan sebelumnya."},
+{bab:"BAB 3 - Tata Cara, Hak & Kewajiban Pemeriksaan",p:0,q:"Hasil Pemeriksaan Ulang yang menyebabkan tambahan jumlah pajak akan diterbitkan dalam bentuk...",o:["STP","SKPKBT","SKPLB","SKPN"],c:1,e:"Pemeriksaan Ulang yang menghasilkan tambahan jumlah pajak dari ketetapan sebelumnya diterbitkan sebagai SKPKBT (Surat Ketetapan Pajak Kurang Bayar Tambahan)."},
+{bab:"BAB 3 - Tata Cara, Hak & Kewajiban Pemeriksaan",p:0,q:"Hasil Pemeriksaan Ulang yang tidak mengakibatkan tambahan pajak tetapi terdapat perubahan jumlah rugi fiskal diterbitkan dalam bentuk...",o:["LHP Sumir","Keputusan Rugi Fiskal","SKPKBT","SKPN"],c:1,e:"Jika Pemeriksaan Ulang tidak menambah jumlah pajak tetapi mengubah jumlah rugi fiskal, diterbitkan Keputusan Rugi Fiskal, bukan SKPKBT."},
+{bab:"BAB 3 - Tata Cara, Hak & Kewajiban Pemeriksaan",p:0,q:"Pengungkapan Ketidakbenaran Pengisian SPT sesuai Pasal 8 ayat (4) UU KUP dapat dilakukan WP dengan syarat...",o:["Dirjen Pajak belum menyampaikan SPHP","pemeriksaan belum dimulai sama sekali","WP sudah menerima surat ketetapan pajak","WP sedang menjalani proses penyidikan"],c:0,e:"Walaupun pemeriksaan telah dilakukan, WP masih dapat mengungkapkan ketidakbenaran pengisian SPT selama Dirjen Pajak belum menyampaikan SPHP."},
+{bab:"BAB 3 - Tata Cara, Hak & Kewajiban Pemeriksaan",p:0,q:"Alur proses pemeriksaan diawali dengan penerbitan...",o:["SPHP","Surat Perintah Pemeriksaan (SP2)","Risalah Pembahasan","Laporan Hasil Pemeriksaan"],c:1,e:"Alur pemeriksaan diawali dengan Surat Perintah Pemeriksaan (SP2), diikuti Surat Pemberitahuan Pemeriksaan, pertemuan, pengujian, hingga SPHP dan PAHP."},
+{bab:"BAB 3 - Tata Cara, Hak & Kewajiban Pemeriksaan",p:0,q:"Keterangan lain tertulis yang dapat diminta pemeriksa dari WP, contohnya...",o:["catatan rapat internal pemeriksa pajak","surat pernyataan tentang kepemilikan harta","liputan media massa tentang perusahaan sejenis","dokumen internal DJP"],c:1,e:"Keterangan lain tertulis dapat berupa surat pernyataan kepemilikan harta, surat pernyataan tidak diaudit KAP, atau kesesuaian fotokopi dokumen."},
+
+{bab:"BAB 4 - Pembukuan & Pencatatan",p:0,q:"Pembukuan menurut Pasal 1 angka 29 UU KUP adalah proses pencatatan teratur yang ditutup dengan menyusun...",o:["SPT Tahunan saja","laporan keuangan berupa neraca dan laporan laba rugi","neraca saldo semata","buku kas harian"],c:1,e:"Pembukuan ditutup dengan menyusun laporan keuangan berupa neraca dan laporan laba rugi untuk periode Tahun Pajak tersebut."},
+{bab:"BAB 4 - Pembukuan & Pencatatan",p:1,q:"WP Orang Pribadi yang DIKECUALIKAN dari kewajiban pembukuan dan dapat menggunakan Norma Penghitungan Penghasilan Neto (NPPN) adalah...",o:["WP OP yang menjalankan usaha/pekerjaan bebas dengan peredaran bruto tidak melebihi Rp4,8 miliar setahun","seluruh WP Badan tanpa kecuali","seluruh Pengusaha Kena Pajak","WP OP dengan omzet di atas Rp4,8 miliar"],c:0,e:"WP OP dengan peredaran bruto di bawah Rp4,8 miliar setahun dapat memilih NPPN, sepanjang memberitahukan kepada Dirjen Pajak dalam 3 bulan pertama Tahun Pajak."},
+{bab:"BAB 4 - Pembukuan & Pencatatan",p:0,q:"Buku, catatan, dan dokumen dasar pembukuan wajib disimpan selama...",o:["5 tahun","10 tahun","3 tahun","selamanya tanpa batas waktu"],c:1,e:"Dokumen dasar pembukuan/pencatatan wajib disimpan di Indonesia selama 10 tahun."},
+{bab:"BAB 4 - Pembukuan & Pencatatan",p:0,q:"Pencatatan menurut Pasal 28 ayat (9) UU KUP berisi data yang dikumpulkan secara teratur tentang...",o:["peredaran/penerimaan bruto dan/atau penghasilan bruto","laba bersih setelah pajak","aset tetap perusahaan","struktur organisasi perusahaan"],c:0,e:"Pencatatan berisi data peredaran/penerimaan bruto dan/atau penghasilan bruto sebagai dasar menghitung pajak terutang."},
+{bab:"BAB 4 - Pembukuan & Pencatatan",p:0,q:"Pembukuan dengan bahasa asing dan mata uang selain Rupiah dapat diselenggarakan setelah...",o:["dilaporkan ke OJK","mendapat izin Menteri Keuangan","disetujui kantor akuntan publik","diaudit oleh BPK"],c:1,e:"Penyelenggaraan pembukuan dengan bahasa asing dan mata uang selain Rupiah memerlukan izin Menteri Keuangan terlebih dahulu."},
+{bab:"BAB 4 - Pembukuan & Pencatatan",p:0,q:"Salah satu pengecualian kewajiban pembukuan bagi WP OP adalah WP OP dengan kriteria tertentu berdasarkan peredaran bruto yang diatur dalam...",o:["PMK 54/PMK.03/2021","PMK 15/2025","PMK 18/PMK.03/2021","UU HPP"],c:0,e:"PMK 54/PMK.03/2021 mengatur WP OP kriteria tertentu berdasarkan peredaran bruto yang dikecualikan dari kewajiban pembukuan dan dapat melakukan pencatatan."},
+
+{bab:"BAB 5 - Penetapan & Ketetapan Pajak",p:0,q:"Prinsip self-assessment menurut Pasal 12 UU KUP menyatakan bahwa jumlah pajak terutang menurut SPT dianggap benar sepanjang...",o:["disetujui akuntan publik yang mengaudit","Dirjen Pajak tidak dapat membuktikan atau memiliki data sebaliknya","telah lewat waktu 1 tahun sejak pelaporan","WP membayar penuh sesuai perhitungannya"],c:1,e:"Pasal 12 UU KUP: jumlah pajak terutang menurut SPT dianggap benar sepanjang Dirjen Pajak tidak dapat membuktikan atau tidak memiliki data bahwa jumlah tersebut tidak benar."},
+{bab:"BAB 5 - Penetapan & Ketetapan Pajak",p:1,q:"SKPKB berdasarkan hasil pemeriksaan (Pasal 13 ayat 1 UU KUP) diterbitkan dalam jangka waktu paling lama...",o:["3 tahun setelah saat terutangnya pajak","5 tahun setelah saat terutangnya pajak","10 tahun setelah saat terutangnya pajak","tidak dibatasi jangka waktu"],c:1,e:"SKPKB diterbitkan dalam jangka waktu paling lama 5 tahun setelah saat terutangnya pajak berdasarkan hasil Pemeriksaan."},
+{bab:"BAB 5 - Penetapan & Ketetapan Pajak",p:1,q:"SKPKBT diterbitkan dalam jangka waktu 5 tahun berdasarkan hasil...",o:["Pemeriksaan pertama kali","Pemeriksaan Ulang","Penelitian formal SPT","Keberatan Wajib Pajak"],c:1,e:"SKPKBT diterbitkan berdasarkan hasil Pemeriksaan Ulang terhadap data baru yang semula belum terungkap, dalam jangka waktu paling lama 5 tahun."},
+{bab:"BAB 5 - Penetapan & Ketetapan Pajak",p:1,q:"Sanksi bunga atas SKPKB berdasarkan Pasal 13 ayat (2) UU KUP (hasil pemeriksaan, pajak tidak/kurang dibayar) dihitung sebesar suku bunga acuan ditambah uplift factor sebesar...",o:["5%","10%","15%","20%"],c:2,e:"Sanksi bunga Pasal 13 ayat (2) UU KUP dihitung sebesar suku bunga acuan ditambah uplift factor 15%, dibagi 12, dikenakan maksimal 24 bulan."},
+{bab:"BAB 5 - Penetapan & Ketetapan Pajak",p:1,q:"Sanksi kenaikan sebesar 75% dikenakan antara lain atas SKPKB dari hasil pemeriksaan terkait...",o:["PPN/PPnBM tidak/kurang dibayar, atau PPh dipotong/dipungut tetapi tidak/kurang disetor","keterlambatan pembayaran angsuran PPh Pasal 25","keterlambatan lapor SPT Masa PPN","pembetulan SPT yang menambah pajak terutang sendiri"],c:0,e:"Sanksi kenaikan 75% dikenakan atas SKPKB Pasal 13 ayat (3) huruf c (PPN/PPnBM tidak/kurang dibayar) dan huruf d (PPh dipotong/dipungut tapi tidak/kurang disetor)."},
+{bab:"BAB 5 - Penetapan & Ketetapan Pajak",p:1,q:"Sanksi kenaikan sebesar 100% dikenakan atas...",o:["SKPKBT berdasarkan data baru yang dimiliki Dirjen Pajak","SKPKBT berdasarkan pengakuan tertulis WP atas kehendak sendiri","STP yang diterbitkan pertama kali","SPT Tahunan yang terlambat dilaporkan"],c:0,e:"Sanksi kenaikan 100% dikenakan atas SKPKBT yang timbul karena data baru yang dimiliki/diperoleh Dirjen Pajak; jika berdasarkan pengakuan tertulis WP atas kehendak sendiri, sanksi tidak dikenakan."},
+{bab:"BAB 5 - Penetapan & Ketetapan Pajak",p:0,q:"SKPLB (Surat Ketetapan Pajak Lebih Bayar) dapat diterbitkan berdasarkan hasil...",o:["Pemeriksaan dan Penelitian","Penyidikan semata","Gugatan Wajib Pajak","Banding Wajib Pajak"],c:0,e:"SKPLB diterbitkan berdasarkan hasil Pemeriksaan (Pasal 17 ayat 1 KUP) atau hasil Penelitian atas pajak yang seharusnya tidak terutang (Pasal 17 ayat 2 KUP)."},
+{bab:"BAB 5 - Penetapan & Ketetapan Pajak",p:0,q:"SKPN (Surat Ketetapan Pajak Nihil) diterbitkan dalam hal...",o:["jumlah kredit pajak sama dengan jumlah pajak terutang, atau pajak tidak terutang dan tidak ada kredit pajak","WP mengajukan keberatan atas ketetapan","WP dalam kondisi kurang bayar","terdapat data konkret baru yang ditemukan"],c:0,e:"SKPN diterbitkan jika jumlah kredit pajak/pembayaran sama dengan pajak terutang, atau pajak tidak terutang dan tidak ada kredit/pembayaran pajak."},
+{bab:"BAB 5 - Penetapan & Ketetapan Pajak",p:0,q:"Denda keterlambatan pelaporan SPT Masa PPN menurut Pasal 7 ayat (1) UU KUP adalah sebesar...",o:["Rp100.000","Rp500.000","Rp1.000.000","Rp250.000"],c:1,e:"Denda keterlambatan SPT Masa PPN adalah Rp500.000, SPT Masa lainnya Rp100.000, SPT Tahunan WP OP Rp100.000, dan SPT Tahunan WP Badan Rp1.000.000."},
+
+{bab:"BAB 6 - Upaya Hukum Perpajakan",p:1,q:"Upaya hukum berikut yang diselesaikan di PENGADILAN (bukan secara administratif di internal DJP) adalah...",o:["Pembetulan","Pengurangan dan Pembatalan","Keberatan","Banding"],c:3,e:"Banding, Gugatan, dan Peninjauan Kembali diajukan dan diproses di Pengadilan Pajak/Mahkamah Agung; sedangkan Pembetulan, Pengurangan/Pembatalan, dan Keberatan diselesaikan secara administratif di DJP."},
+{bab:"BAB 6 - Upaya Hukum Perpajakan",p:1,q:"Salah satu syarat pengajuan Keberatan adalah...",o:["WP harus melunasi seluruh pajak terutang menurut ketetapan","melunasi pajak yang masih harus dibayar paling sedikit sejumlah yang telah disetujui WP dalam PAHP","tidak perlu melampirkan jumlah pajak menurut perhitungan WP","boleh diajukan untuk lebih dari satu jenis pajak sekaligus dalam satu surat"],c:1,e:"Syarat Keberatan antara lain: 1 jenis pajak untuk 1 Masa/Tahun Pajak, mencantumkan jumlah pajak menurut WP, dan melunasi pajak yang masih harus dibayar paling sedikit sejumlah yang telah disetujui WP dalam Pembahasan Akhir Hasil Pemeriksaan."},
+{bab:"BAB 6 - Upaya Hukum Perpajakan",p:1,q:"Jangka waktu penyelesaian Keberatan oleh Dirjen Pajak paling lama adalah...",o:["3 bulan","6 bulan","12 bulan","24 bulan"],c:2,e:"Dirjen Pajak wajib memberikan keputusan atas Keberatan paling lama 12 bulan sejak surat keberatan diterima."},
+{bab:"BAB 6 - Upaya Hukum Perpajakan",p:1,q:"Sanksi administratif denda atas pengajuan Keberatan yang ditolak atau dikabulkan sebagian adalah sebesar...",o:["30%","50%","60%","100%"],c:0,e:"Jika permohonan Keberatan ditolak atau dikabulkan sebagian, WP dikenai sanksi administratif denda 30% dari jumlah pajak berdasarkan keputusan keberatan dikurangi pajak yang telah dibayar sebelum mengajukan keberatan."},
+{bab:"BAB 6 - Upaya Hukum Perpajakan",p:0,q:"Permohonan Banding diajukan terhadap...",o:["Surat Ketetapan Pajak secara langsung","Surat Keputusan Keberatan","Surat Tagihan Pajak secara langsung","Laporan Hasil Pemeriksaan"],c:1,e:"Banding diajukan ke Pengadilan Pajak atas Surat Keputusan Keberatan, bukan langsung atas surat ketetapan pajak."},
+{bab:"BAB 6 - Upaya Hukum Perpajakan",p:0,q:"Jangka waktu pengajuan Banding sejak Surat Keputusan Keberatan diterima paling lama adalah...",o:["1 bulan","3 bulan","6 bulan","12 bulan"],c:1,e:"Banding diajukan paling lama 3 bulan sejak Surat Keputusan Keberatan diterima, dilampiri salinan Surat Keputusan Keberatan."},
+{bab:"BAB 6 - Upaya Hukum Perpajakan",p:0,q:"Sanksi administratif denda jika permohonan Banding ditolak atau dikabulkan sebagian adalah sebesar...",o:["30%","50%","60%","100%"],c:2,e:"Jika permohonan Banding ditolak atau dikabulkan sebagian, WP dikenai sanksi administratif denda sebesar 60%."},
+{bab:"BAB 6 - Upaya Hukum Perpajakan",p:0,q:"Gugatan diajukan terhadap, antara lain...",o:["pelaksanaan Surat Paksa, Surat Perintah Melaksanakan Penyitaan, atau Pengumuman Lelang","perhitungan Penghasilan Kena Pajak dalam SPT","hasil pemeriksaan sebelum SKP diterbitkan","permohonan pendaftaran NPWP"],c:0,e:"Objek Gugatan antara lain pelaksanaan Surat Paksa, Surat Perintah Melaksanakan Penyitaan, Pengumuman Lelang, dan keputusan terkait penagihan/perpajakan lain yang tidak sesuai prosedur."},
+{bab:"BAB 6 - Upaya Hukum Perpajakan",p:0,q:"Peninjauan Kembali (PK) atas Putusan Pengadilan Pajak diajukan ke...",o:["Pengadilan Pajak","Mahkamah Agung","Mahkamah Konstitusi","Direktorat Jenderal Pajak"],c:1,e:"PK merupakan upaya hukum luar biasa yang diajukan ke Mahkamah Agung, maksimal 1 kali, atas dasar alasan tertentu sesuai Pasal 89 UU Pengadilan Pajak."},
+{bab:"BAB 6 - Upaya Hukum Perpajakan",p:0,q:"Prosedur Persetujuan Bersama (MAP) dapat diajukan oleh pihak-pihak berikut, KECUALI...",o:["WP dalam negeri","Direktur Jenderal Pajak","Pejabat berwenang negara mitra P3B","Pengadilan Pajak"],c:3,e:"MAP diajukan oleh WP dalam negeri, Dirjen Pajak, pejabat berwenang negara mitra P3B, atau WNI melalui Dirjen Pajak terkait perlakuan diskriminatif. Pengadilan Pajak bukan pihak yang mengajukan MAP."},
+
+{bab:"BAB 7 - KUP Dasar",p:0,q:"Sejak 14 Juli 2022, NIK digunakan sebagai NPWP bagi...",o:["seluruh Wajib Pajak tanpa kecuali","Wajib Pajak Orang Pribadi penduduk","Wajib Pajak Badan saja","Wajib Pajak Instansi Pemerintah saja"],c:1,e:"NIK digunakan sebagai NPWP khusus bagi WP Orang Pribadi penduduk; WP badan, instansi pemerintah, dan OP bukan penduduk tetap memakai NPWP format 16 digit."},
+{bab:"BAB 7 - KUP Dasar",p:0,q:"Batas waktu pendaftaran NPWP bagi WP OP yang menjalankan usaha/pekerjaan bebas paling lama adalah...",o:["1 bulan setelah kegiatan usaha mulai dilakukan","akhir tahun pajak berjalan tanpa syarat lain","3 bulan setelah mulai usaha","tidak ada batas waktu tertentu"],c:0,e:"WP OP yang menjalankan usaha/pekerjaan bebas wajib mendaftarkan diri paling lama 1 bulan setelah kegiatan usaha atau pekerjaan bebas mulai dilakukan."},
+{bab:"BAB 7 - KUP Dasar",p:0,q:"Batas waktu pelaporan usaha untuk dikukuhkan sebagai PKP bagi Pengusaha Kecil yang omzetnya melebihi batas paling lama adalah...",o:["akhir bulan berikutnya setelah peredaran bruto melebihi batas Pengusaha Kecil","1 hari setelah omzet melebihi batas","akhir tahun buku berjalan tanpa syarat lain","6 bulan setelah omzet melebihi batas"],c:0,e:"Pengusaha yang peredaran brutonya melebihi batas Pengusaha Kecil wajib melaporkan usahanya untuk dikukuhkan sebagai PKP paling lama akhir bulan berikutnya."},
+{bab:"BAB 7 - KUP Dasar",p:1,q:"Batasan peredaran bruto Pengusaha Kecil yang tidak wajib dikukuhkan sebagai PKP adalah...",o:["Rp2,4 miliar","Rp4,8 miliar","Rp50 miliar","Rp600 juta"],c:1,e:"Batasan peredaran bruto Pengusaha Kecil adalah Rp4,8 miliar setahun; di atas itu, pengusaha wajib dikukuhkan sebagai PKP."},
+{bab:"BAB 7 - KUP Dasar",p:0,q:"Jenis SPT yang digunakan PKP untuk melaporkan PPN secara umum adalah formulir...",o:["1111","1111 DM","1107 PUT","1770"],c:0,e:"Formulir 1111 digunakan PKP untuk melaporkan penghitungan/pembayaran PPN sesuai ketentuan umum; 1111 DM untuk PKP yang menggunakan pedoman pengkreditan PM; 1107 PUT untuk pemungut PPN."},
+{bab:"BAB 7 - KUP Dasar",p:0,q:"Batas waktu penyampaian SPT Tahunan PPh Wajib Pajak Badan paling lama adalah...",o:["3 bulan setelah akhir Tahun Pajak","4 bulan setelah akhir Tahun Pajak","2 bulan setelah akhir Tahun Pajak","6 bulan setelah akhir Tahun Pajak"],c:1,e:"SPT Tahunan PPh WP Badan disampaikan paling lama 4 bulan setelah akhir Tahun Pajak; untuk WP OP paling lama 3 bulan."},
+{bab:"BAB 7 - KUP Dasar",p:0,q:"Wajib Pajak dapat memperpanjang jangka waktu penyampaian SPT Tahunan PPh paling lama...",o:["1 bulan","2 bulan","3 bulan","6 bulan"],c:1,e:"Perpanjangan jangka waktu penyampaian SPT Tahunan PPh paling lama 2 bulan sejak batas waktu penyampaian, dengan Pemberitahuan Perpanjangan."},
+{bab:"BAB 7 - KUP Dasar",p:0,q:"Pembetulan SPT yang mengakibatkan utang pajak lebih besar dikenai sanksi bunga berdasarkan...",o:["Pasal 7 UU KUP","Pasal 8 UU KUP","Pasal 13 UU KUP","Pasal 14 UU KUP"],c:1,e:"Pembetulan SPT atas kemauan sendiri yang menambah utang pajak dikenai sanksi bunga Pasal 8 UU KUP (suku bunga acuan + 5% dibagi 12)."},
+
+{bab:"BAB 8 - Pajak Penghasilan (PPh)",p:1,q:"Besaran PTKP untuk diri Wajib Pajak Orang Pribadi adalah...",o:["Rp36.000.000","Rp54.000.000","Rp48.000.000","Rp60.000.000"],c:1,e:"PTKP untuk diri WP Orang Pribadi adalah Rp54.000.000 setahun, ditambah Rp4.500.000 untuk status kawin dan per tanggungan (maksimal 3 orang)."},
+{bab:"BAB 8 - Pajak Penghasilan (PPh)",p:0,q:"Tambahan PTKP untuk status Wajib Pajak kawin adalah sebesar...",o:["Rp2.250.000","Rp4.500.000","Rp9.000.000","Rp1.500.000"],c:1,e:"Tambahan PTKP untuk status kawin adalah Rp4.500.000, sama besarnya dengan tambahan per tanggungan."},
+{bab:"BAB 8 - Pajak Penghasilan (PPh)",p:0,q:"Maksimal jumlah tanggungan yang dapat ditambahkan dalam penghitungan PTKP per keluarga adalah...",o:["2 orang","3 orang","4 orang","tidak dibatasi"],c:1,e:"Tambahan PTKP untuk tanggungan dibatasi maksimal 3 orang per keluarga, meliputi keluarga sedarah/semenda garis lurus dan anak angkat yang menjadi tanggungan sepenuhnya."},
+{bab:"BAB 8 - Pajak Penghasilan (PPh)",p:1,q:"Tarif PPh Final bagi Wajib Pajak dengan peredaran bruto tertentu (UMKM) sesuai PP 55/2022 adalah sebesar...",o:["0,25%","0,5%","1%","2%"],c:1,e:"Tarif PPh Final bagi WP dengan peredaran bruto tertentu adalah 0,5% dari peredaran bruto usaha."},
+{bab:"BAB 8 - Pajak Penghasilan (PPh)",p:1,q:"Batasan peredaran bruto usaha WP Orang Pribadi yang TIDAK dikenai PPh (0%) dalam skema PPh Final UMKM adalah sampai dengan...",o:["Rp100 juta per tahun","Rp500 juta per tahun","Rp4,8 miliar per tahun","tidak ada batasan"],c:1,e:"Khusus WP OP, bagian peredaran bruto dari usaha sampai dengan Rp500 juta dalam 1 Tahun Pajak tidak dikenai PPh, dihitung kumulatif sejak Masa Pajak pertama."},
+{bab:"BAB 8 - Pajak Penghasilan (PPh)",p:0,q:"Jangka waktu pemanfaatan tarif PPh Final 0,5% bagi WP Orang Pribadi menurut PP 55/2022 (sebelum diubah PP 20/2026) adalah paling lama...",o:["3 tahun pajak","7 tahun pajak","10 tahun pajak","tidak dibatasi"],c:1,e:"Berdasarkan PP 55/2022, jangka waktu pemanfaatan PPh Final 0,5% bagi WP OP adalah 7 Tahun Pajak, sedangkan PT Perorangan 3-4 Tahun Pajak (ketentuan ini dihapus oleh PP 20/2026)."},
+{bab:"BAB 8 - Pajak Penghasilan (PPh)",p:1,q:"Dividen dari dalam negeri yang diterima WP Orang Pribadi dalam negeri dikecualikan dari objek PPh apabila...",o:["diinvestasikan kembali di NKRI sesuai kriteria bentuk, tata cara, dan jangka waktu investasi serta memenuhi kewajiban laporan realisasi","langsung dikonsumsi oleh penerima dividen","dilaporkan dalam SPT tanpa syarat investasi apapun","nilainya di atas Rp1 miliar"],c:0,e:"Dividen dalam negeri yang diterima WP OP dikecualikan dari objek PPh jika diinvestasikan kembali di NKRI sesuai ketentuan bentuk/tata cara/jangka waktu investasi dan WP menyampaikan laporan realisasi investasi."},
+{bab:"BAB 8 - Pajak Penghasilan (PPh)",p:0,q:"Tarif PPh Badan umum sesuai UU HPP/PP 55/2022 adalah sebesar...",o:["20%","22%","25%","15%"],c:1,e:"Tarif PPh Badan umum adalah 22%, dengan fasilitas pengurangan 50% (Pasal 31E) bagi WP Badan dengan peredaran bruto sampai Rp50 miliar."},
+{bab:"BAB 8 - Pajak Penghasilan (PPh)",p:0,q:"Fasilitas Pasal 31E UU PPh berupa pengurangan tarif 50% diberikan kepada WP Badan dalam negeri dengan peredaran bruto sampai dengan...",o:["Rp4,8 miliar","Rp50 miliar","Rp10 miliar","Rp100 miliar"],c:1,e:"Fasilitas Pasal 31E diberikan kepada WP Badan dengan peredaran bruto sampai dengan Rp50 miliar, atas bagian Penghasilan Kena Pajak dari peredaran bruto sampai Rp4,8 miliar."},
+{bab:"BAB 8 - Pajak Penghasilan (PPh)",p:0,q:"Kompensasi kerugian fiskal dapat dikompensasikan secara berturut-turut selama...",o:["3 tahun","5 tahun","7 tahun","10 tahun"],c:1,e:"Kompensasi kerugian fiskal dapat dikompensasikan selama 5 tahun berturut-turut dimulai sejak tahun berikutnya sesudah tahun didapatnya kerugian."},
+
+{bab:"BAB 9 - Pajak Pertambahan Nilai (PPN)",p:0,q:"Tarif PPN umum yang berlaku sejak 1 April 2022 adalah...",o:["10%","11%","12%","15%"],c:1,e:"Tarif PPN umum naik dari 10% menjadi 11% sejak 1 April 2022, dan akan menjadi 12% paling lambat sesuai ketentuan UU HPP; tarif ekspor tetap 0%."},
+{bab:"BAB 9 - Pajak Pertambahan Nilai (PPN)",p:0,q:"Pengusaha Kecil yang tidak wajib dikukuhkan sebagai PKP adalah pengusaha dengan peredaran bruto tidak lebih dari...",o:["Rp1,8 miliar","Rp4,8 miliar","Rp600 juta","Rp2,4 miliar"],c:1,e:"Batasan Pengusaha Kecil dalam ketentuan PPN adalah Rp4,8 miliar setahun, konsisten dengan batasan di KUP."},
+{bab:"BAB 9 - Pajak Pertambahan Nilai (PPN)",p:1,q:"Faktur Pajak harus memenuhi dua jenis persyaratan, yaitu...",o:["formal dan administratif","formal dan material","material dan prosedural","legal dan teknis"],c:1,e:"Persyaratan formal berkaitan dengan pengisian yang benar, lengkap, dan jelas (Pasal 13 ayat 5/6 UU PPN); persyaratan material berkaitan dengan kebenaran/kesungguhan keterangan yang dicantumkan."},
+{bab:"BAB 9 - Pajak Pertambahan Nilai (PPN)",p:1,q:"Faktur Pajak yang dibuat melewati jangka waktu 3 bulan sejak seharusnya dibuat berakibat...",o:["tetap sah sepenuhnya tanpa konsekuensi","dianggap tidak membuat Faktur Pajak, dan PPN-nya tidak dapat dikreditkan","hanya dikenai denda administratif tanpa kehilangan hak kredit","wajib dibuat ulang tanpa sanksi apapun"],c:1,e:"Faktur Pajak yang terlambat dibuat lebih dari 3 bulan dianggap tidak dibuat, sehingga PKP dikenai sanksi UU KUP dan PPN di dalamnya tidak dapat dikreditkan sebagai Pajak Masukan."},
+{bab:"BAB 9 - Pajak Pertambahan Nilai (PPN)",p:0,q:"Pajak Masukan yang dapat dikreditkan tetapi belum dikreditkan pada Masa Pajak yang sama, dapat dikreditkan paling lama...",o:["1 Masa Pajak berikutnya","3 Masa Pajak setelah berakhirnya Masa Pajak saat Faktur Pajak dibuat","6 Masa Pajak berikutnya","12 Masa Pajak berikutnya"],c:1,e:"Pajak Masukan yang belum dikreditkan pada Masa Pajak yang sama dapat dikreditkan paling lama 3 Masa Pajak berikutnya setelah berakhirnya Masa Pajak saat Faktur Pajak dibuat."},
+{bab:"BAB 9 - Pajak Pertambahan Nilai (PPN)",p:1,q:"PPN atas Kegiatan Membangun Sendiri (KMS) dihitung sebesar...",o:["11% dikali DPP penuh","20% dikali 11% dikali biaya yang dikeluarkan untuk membangun (tidak termasuk tanah)","10% dikali total biaya termasuk tanah","1,1% dikali total biaya"],c:1,e:"PPN KMS dihitung sebesar 20% x 11% x biaya pembangunan (tidak termasuk perolehan tanah), dengan syarat luas bangunan minimal 200 m²."},
+{bab:"BAB 9 - Pajak Pertambahan Nilai (PPN)",p:0,q:"Kriteria minimal luas bangunan untuk dikenai PPN Kegiatan Membangun Sendiri (KMS) adalah...",o:["100 m²","150 m²","200 m²","300 m²"],c:2,e:"Bangunan dikenai PPN KMS jika konstruksi utamanya memenuhi kriteria tertentu dan luas keseluruhan paling sedikit 200 m²."},
+{bab:"BAB 9 - Pajak Pertambahan Nilai (PPN)",p:0,q:"Dasar Pengenaan Pajak (DPP) untuk penyerahan BKP dari pusat ke cabang menggunakan Nilai Lain berupa...",o:["harga pasar wajar","harga pokok penjualan atau harga perolehan","harga jual eceran","nilai impor"],c:1,e:"DPP Nilai Lain untuk penyerahan BKP dari pusat ke cabang (atau sebaliknya/antar cabang) adalah harga pokok penjualan atau harga perolehan."},
+{bab:"BAB 9 - Pajak Pertambahan Nilai (PPN)",p:1,q:"Pengkreditan Pajak Masukan bagi Pengusaha sebelum dikukuhkan sebagai PKP menggunakan pedoman sebesar...",o:["50% dari Pajak Keluaran yang seharusnya dipungut","80% dari Pajak Keluaran yang seharusnya dipungut","100% dari Pajak Keluaran yang seharusnya dipungut","tidak dapat dikreditkan sama sekali"],c:1,e:"PM atas perolehan BKP/JKP sebelum Pengusaha dikukuhkan sebagai PKP dapat dikreditkan menggunakan pedoman pengkreditan sebesar 80% dari Pajak Keluaran yang seharusnya dipungut."},
+{bab:"BAB 9 - Pajak Pertambahan Nilai (PPN)",p:0,q:"PKP Pedagang Eceran dapat membuat Faktur Pajak eceran tanpa mencantumkan...",o:["PPN yang dipungut","identitas pembeli serta nama dan tanda tangan penjual","tanggal pembuatan faktur","jenis barang atau jasa"],c:1,e:"Faktur Pajak eceran bagi penyerahan ke konsumen akhir dapat dibuat tanpa mencantumkan identitas pembeli serta nama dan tanda tangan penjual, dapat berupa bon kontan, kuitansi, atau tanda bukti sejenis."},
+
+{bab:"BAB 10 - Pajak Bumi dan Bangunan (PBB)",p:0,q:"Dasar pengenaan Pajak Bumi dan Bangunan adalah...",o:["Nilai Jual Objek Pajak (NJOP)","Nilai Jual Kena Pajak","Harga Pasar Wajar langsung","Nilai Pasar Properti dari agen"],c:0,e:"Dasar pengenaan PBB adalah Nilai Jual Objek Pajak (NJOP), ditetapkan melalui proses penilaian oleh Penilai Pajak."},
+{bab:"BAB 10 - Pajak Bumi dan Bangunan (PBB)",p:0,q:"SPOP (Surat Pemberitahuan Objek Pajak) wajib disampaikan paling lama...",o:["14 hari setelah diterima","30 hari setelah tanggal diterimanya","60 hari setelah diterima","90 hari setelah diterima"],c:1,e:"SPOP wajib diisi dengan jelas, benar, lengkap, dan disampaikan paling lama 30 hari setelah tanggal diterimanya."},
+{bab:"BAB 10 - Pajak Bumi dan Bangunan (PBB)",p:0,q:"Objek Pajak PBB Sektor P5L mencakup sektor-sektor berikut, KECUALI...",o:["Perkebunan","Perhutanan","Pertambangan Migas","Perumahan Subsidi"],c:3,e:"Sektor P5L mencakup Perkebunan, Perhutanan, Pertambangan Migas, Pertambangan Panas Bumi, Pertambangan Minerba, dan Sektor Lainnya; Perumahan Subsidi bukan bagian dari klasifikasi ini."},
+{bab:"BAB 10 - Pajak Bumi dan Bangunan (PBB)",p:0,q:"Penilaian objek pajak untuk penetapan NJOP PBB dilakukan oleh...",o:["Konsultan independen pilihan WP","Penilai Pajak","Akuntan Publik","Notaris"],c:1,e:"Penilaian objek pajak untuk menetapkan NJOP PBB merupakan kewenangan Penilai Pajak sesuai PMK-186/PMK.03/2019 jo. PMK-234/PMK.03/2022."},
+{bab:"BAB 10 - Pajak Bumi dan Bangunan (PBB)",p:0,q:"Jatuh tempo pelunasan SPPT PBB adalah selambat-lambatnya...",o:["1 bulan sejak diterima","6 bulan sejak tanggal diterima","3 bulan sejak diterima","1 tahun sejak diterima"],c:1,e:"SPPT PBB harus dilunasi selambat-lambatnya 6 bulan sejak tanggal diterima; jika tidak/kurang dibayar setelah jatuh tempo, diterbitkan STP PBB."},
+{bab:"BAB 10 - Pajak Bumi dan Bangunan (PBB)",p:0,q:"Jangka waktu penerbitan SKP PBB paling lama adalah...",o:["2 tahun","5 tahun setelah berakhirnya Tahun Pajak PBB terutang","10 tahun","tidak dibatasi"],c:1,e:"SKP PBB dapat diterbitkan dalam jangka waktu paling lama 5 tahun setelah berakhirnya Tahun Pajak PBB terutang."},
+
+{bab:"BAB 11 - PSIAP / Coretax",p:0,q:"Sistem administrasi perpajakan baru DJP yang mulai berlaku penuh sejak 1 Januari 2025 dikenal dengan nama...",o:["SIDJP Nine","Coretax","e-Filing","DJP Online"],c:1,e:"Coretax merupakan wujud dari Pembaruan Sistem Inti Administrasi Perpajakan (PSIAP) sesuai PMK 81/2024, yang menggantikan sistem administrasi lama secara bertahap."},
+{bab:"BAB 11 - PSIAP / Coretax",p:0,q:"Penandatanganan dokumen elektronik oleh Wajib Pajak pada Coretax dapat menggunakan...",o:["Tanda Tangan Elektronik Tersertifikasi (TTE) dan/atau Kode Otorisasi DJP","tanda tangan basah yang discan saja","cap stempel perusahaan semata","QR Code tanpa autentikasi apapun"],c:0,e:"WP dapat menandatangani dokumen elektronik menggunakan TTE Tersertifikasi dari PSrE (opsional) atau Kode Otorisasi DJP yang diterbitkan saat Aktivasi Akun WP."},
+{bab:"BAB 11 - PSIAP / Coretax",p:1,q:"Mulai berlakunya kewajiban dan hak sebagai PKP menurut PMK-164/2023 (ketentuan baru) ditentukan oleh...",o:["saat terbit Surat Pengukuhan PKP (SPPKP), sama seperti aturan lama","pemberitahuan Masa Pajak yang dipilih WP, maksimal Masa Pajak pertama tahun buku berikutnya","tanggal pendaftaran NPWP","akhir tahun kalender tanpa perlu pemberitahuan"],c:1,e:"Berbeda dari aturan lama, PMK-164/2023 memberi WP kemudahan memilih saat dimulainya kewajiban pungut-setor-lapor PPN/PPnBM melalui pemberitahuan Masa Pajak, paling lambat Masa Pajak pertama tahun buku berikutnya."},
+{bab:"BAB 11 - PSIAP / Coretax",p:0,q:"Akun Wajib Pajak pada Coretax digunakan untuk...",o:["hanya melihat profil Wajib Pajak","melaksanakan hak dan pemenuhan kewajiban perpajakan secara elektronik","menggantikan NPWP sepenuhnya","hanya untuk komunikasi dengan KPP"],c:1,e:"Akun WP disediakan Dirjen Pajak bagi setiap WP untuk melaksanakan hak dan memenuhi kewajiban perpajakan secara elektronik setelah diaktivasi."},
+{bab:"BAB 11 - PSIAP / Coretax",p:0,q:"Imbalan Bunga atas keterlambatan pengembalian kelebihan pembayaran pajak diatur dalam...",o:["Pasal 11 ayat (3) UU KUP","Pasal 25 UU KUP","Pasal 36 UU KUP","Pasal 44 UU KUP"],c:0,e:"Imbalan bunga atas keterlambatan pengembalian kelebihan pembayaran pajak diatur dalam Pasal 11 ayat (3) UU KUP; ada pula imbalan bunga lain berdasarkan Pasal 17B dan Pasal 27B UU KUP."},
+{bab:"BAB 11 - PSIAP / Coretax",p:0,q:"Dokumen yang diterbitkan sebelum SPMKP/SPMIB dalam alur pengembalian kelebihan pajak adalah...",o:["SKPKPP","SP2D langsung tanpa dokumen lain","BAP2DK","LHP2DK"],c:0,e:"Alur pengembalian: SKPLB/SK/Putusan → SKPKPP (Surat Keputusan Pengembalian Pendahuluan Kelebihan Pajak) → SPMKP/SPMIB → SP2D."},
+
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Pengawasan Pembayaran Masa (PPM) dilakukan atas kewajiban yang jatuh tempo pada...",o:["Tahun Pajak sebelum tahun berjalan","Tahun Pajak berjalan","seluruh tahun pajak tanpa batas","5 tahun terakhir saja"],c:1,e:"PPM dilakukan atas kewajiban yang jatuh tempo di Tahun Pajak berjalan, sedangkan Pengawasan Kepatuhan Material (PKM) untuk kewajiban yang jatuh tempo sebelum tahun berjalan."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:1,q:"SP2DK adalah singkatan dari...",o:["Surat Perintah Pemeriksaan dan Data Keuangan","Surat Permintaan Penjelasan atas Data dan/atau Keterangan","Surat Pemberitahuan Penetapan dan Denda Kepatuhan","Surat Perintah Penagihan dan Pencairan"],c:1,e:"SP2DK adalah Surat Permintaan Penjelasan atas Data dan/atau Keterangan, instrumen utama dalam kegiatan Pengawasan Kepatuhan Wajib Pajak."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:1,q:"Wajib Pajak diberikan jangka waktu untuk menyampaikan tanggapan atas SP2DK paling lama...",o:["7 hari kalender","14 hari kalender","21 hari kalender","30 hari kalender"],c:1,e:"Jangka waktu tanggapan SP2DK paling lama 14 hari kalender, dapat diperpanjang 7 hari jika permohonan diajukan sebelum jangka waktu tersebut berakhir."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Perpanjangan jangka waktu tanggapan SP2DK dapat diberikan tambahan selama...",o:["3 hari","7 hari","14 hari","30 hari"],c:1,e:"Tambahan jangka waktu perpanjangan tanggapan SP2DK adalah 7 hari, dengan permohonan diterima KPP sebelum jangka waktu 14 hari awal berakhir."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Bentuk kegiatan Pengawasan menurut Pasal 4 PMK 111/2025 meliputi, KECUALI...",o:["meminta penjelasan atas data dan/atau keterangan","melakukan Kunjungan","menerbitkan Surat Ketetapan Pajak langsung tanpa proses pemeriksaan","menyampaikan imbauan"],c:2,e:"Pengawasan bersifat persuasif/administratif (permintaan penjelasan, kunjungan, imbauan, teguran); penerbitan ketetapan pajak melalui jalur pemeriksaan, bukan langsung dari kegiatan pengawasan."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Hasil kegiatan P2DK yang tidak ditindaklanjuti (case closed) antara lain dalam hal Wajib Pajak...",o:["tidak dapat ditemukan atau telah meninggal dunia tanpa warisan yang belum terbagi","setuju membayar sebagian potensi pajak","hadir dalam pembahasan akhir","memiliki potensi pajak yang signifikan"],c:0,e:"Case closed berlaku jika WP tidak ditemukan, telah meninggal tanpa warisan, menjadi SPLN, tidak memenuhi syarat subjektif/objektif, tidak ada indikasi kewajiban, atau telah memenuhi kewajiban."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Surat Pemberitahuan Hasil Pengujian/Pengawasan disingkat...",o:["SPHP","SPHPP","LHP2DK","BAP2DK"],c:1,e:"SPHPP (Surat Pemberitahuan Hasil Pengujian/Pengawasan) digunakan dalam alur Pengawasan, berbeda dengan SPHP yang digunakan dalam alur Pemeriksaan."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Tindak lanjut Pengawasan Kepatuhan Material (PKM) yang menemukan indikasi ketidakpatuhan dengan estimasi potensi dapat berupa...",o:["P2DK, Usulan Pemeriksaan, atau Usul Pemeriksaan Bukti Permulaan","langsung penerbitan SKPKB tanpa proses lain","pencabutan NPWP secara otomatis","penyegelan tempat usaha WP"],c:0,e:"Jika PKM menemukan indikasi ketidakpatuhan dengan estimasi potensi belum dipenuhi, tindak lanjutnya berupa P2DK, Usulan Pemeriksaan, atau Usul Pemeriksaan Bukti Permulaan (Buper)."},
+
+{bab:"BAB 13 - Analisis Potensi Pajak & Profiling WP",p:0,q:"Pendekatan tidak langsung untuk menghitung ulang peredaran usaha WP meliputi, KECUALI...",o:["Transaksi tunai dan bank","Sumber dan penggunaan dana","Penyusutan aset tetap","Pertambahan kekayaan bersih"],c:2,e:"6 pendekatan metode tidak langsung meliputi transaksi tunai & bank, sumber-penggunaan dana, penghitungan rasio, satuan/volume, biaya hidup, dan pertambahan kekayaan bersih — penyusutan aset tetap bukan termasuk pendekatan ini."},
+{bab:"BAB 13 - Analisis Potensi Pajak & Profiling WP",p:0,q:"Metode penghitungan biaya hidup mengasumsikan bahwa jika WP tidak memiliki utang, maka penghasilannya minimal sama dengan...",o:["laba bersih usaha tahun sebelumnya","biaya hidupnya","setoran pajak tahun lalu","nilai aset tetap yang dimiliki"],c:1,e:"Jika WP tidak memiliki utang, penghasilannya minimal sama dengan biaya hidupnya — penghasilan bruto tersebut merupakan titik impas (break even point) untuk mencukupi kebutuhan hidup."},
+{bab:"BAB 13 - Analisis Potensi Pajak & Profiling WP",p:0,q:"Metode Penambahan Kekayaan Bersih menghitung penghasilan WP dengan cara...",o:["menjumlahkan pertambahan kekayaan bersih dengan biaya hidup","mengurangkan utang dari aset lancar saja","mengalikan omzet dengan tarif pajak berlaku","membandingkan dengan WP sejenis tanpa penyesuaian"],c:0,e:"Penghasilan WP OP dihitung dengan menjumlahkan pertambahan kekayaan bersih (selisih kekayaan awal dan akhir tahun) dengan biaya hidup."},
+{bab:"BAB 13 - Analisis Potensi Pajak & Profiling WP",p:0,q:"\"Jembreng PPN\" dalam analisis kepatuhan material digunakan untuk...",o:["menyandingkan data SPT PPN dalam satu halaman guna deteksi anomali kompensasi/setoran","menghitung penyusutan aktiva tetap","menentukan tarif PPnBM yang berlaku","menyusun laporan keuangan konsolidasi"],c:0,e:"Jembreng PPN adalah penyandingan data SPT Masa PPN dalam satu halaman untuk mendeteksi anomali seperti kompensasi yang tidak nyambung atau setoran di masa yang sama tanpa dasar."},
+{bab:"BAB 13 - Analisis Potensi Pajak & Profiling WP",p:0,q:"Teknik ekualisasi umum yang dilakukan dalam profiling WP antara lain membandingkan...",o:["Omzet PPN dengan Omzet PPh Badan/OP","NPWP dengan NIK","alamat KTP dengan Kartu Keluarga","jumlah pegawai dengan luas kantor"],c:0,e:"Ekualisasi umum meliputi perbandingan Omzet PPN vs PPh Badan/OP, Biaya Gaji vs penghasilan di SPT PPh 21, dan Biaya Sewa vs pemotongan PPh 23/Final."},
+{bab:"BAB 13 - Analisis Potensi Pajak & Profiling WP",p:0,q:"Kegiatan Pengumpulan Data Lapangan (KPDL) Berbasis Kewilayahan dilakukan dengan cara...",o:["menyisir bidang, persil, unit, atau lokasi WP di wilayah kerja KPP","hanya melalui telepon tanpa kunjungan","hanya melalui pemantauan media sosial","menunggu laporan WP sukarela tanpa inisiatif"],c:0,e:"KPDL Berbasis Kewilayahan dilakukan dengan menyisir bidang, persil, unit, atau lokasi WP berdasarkan zona pengawasan, melalui kegiatan lapangan maupun nonlapangan."},
+{bab:"BAB 13 - Analisis Potensi Pajak & Profiling WP",p:0,q:"Minimal jumlah pegawai yang melaksanakan KPDL di lapangan adalah...",o:["1 orang","2 orang","3 orang","5 orang"],c:1,e:"KPDL dilaksanakan minimal oleh 2 orang pegawai, menggunakan pakaian kerja dan dilengkapi tanda pengenal, Surat Tugas, dan dokumen terkait."},
+{bab:"BAB 13 - Analisis Potensi Pajak & Profiling WP",p:0,q:"Profil Wajib Pajak paling sedikit memuat hal-hal berikut, KECUALI...",o:["Identitas Wajib Pajak","Riwayat Pengawasan dan Pemeriksaan","Data pribadi pasangan kerja tanpa kaitan usaha","Profil risiko (CRM)"],c:2,e:"Profil WP memuat identitas, kegiatan usaha, daftar keluarga/keterkaitan yang relevan, profil risiko CRM, riwayat pengawasan/pemeriksaan/keberatan-banding, dan profil risiko ketertagihan — bukan data pribadi yang tidak terkait usaha."},
+
+{bab:"BAB 14 - Transfer Pricing / PKKU",p:0,q:"Hubungan Istimewa karena kepemilikan modal menurut PMK 172/2023 terjadi apabila penyertaan modal langsung/tidak langsung paling rendah...",o:["15%","20%","25%","50%"],c:2,e:"Hubungan istimewa karena kepemilikan modal terjadi jika penyertaan modal langsung atau tidak langsung paling rendah 25%."},
+{bab:"BAB 14 - Transfer Pricing / PKKU",p:0,q:"Prinsip Kewajaran dan Kelaziman Usaha (PKKU) diterapkan dengan cara membandingkan kondisi dan indikator harga...",o:["Transaksi yang Dipengaruhi Hubungan Istimewa dengan Transaksi Independen yang sebanding","transaksi dalam negeri dengan luar negeri tanpa penyesuaian apapun","harga pasar global rata-rata semua komoditas","harga pokok produksi semata"],c:0,e:"PKKU diterapkan dengan membandingkan kondisi dan indikator harga Transaksi yang Dipengaruhi Hubungan Istimewa dengan Transaksi Independen yang sebanding."},
+{bab:"BAB 14 - Transfer Pricing / PKKU",p:0,q:"Metode Penentuan Harga Transfer yang membandingkan harga langsung antar pihak independen disebut...",o:["Resale Price Method","Comparable Uncontrolled Price (CUP)","Cost Plus Method","Profit Split Method"],c:1,e:"CUP (Comparable Uncontrolled Price) membandingkan harga langsung antara Transaksi Dipengaruhi Hubungan Istimewa dengan Transaksi Independen, cocok untuk produk komoditas."},
+{bab:"BAB 14 - Transfer Pricing / PKKU",p:0,q:"Metode yang sesuai untuk transaksi distributor/reseller yang tidak menanggung risiko bisnis signifikan adalah...",o:["Resale Price Method","Cost Plus Method","Profit Split Method","TNMM"],c:0,e:"Resale Price Method sesuai untuk transaksi distributor/reseller yang menjual dengan harga sesuai PKKU dan tidak menanggung risiko bisnis atau memberi nilai tambah signifikan."},
+{bab:"BAB 14 - Transfer Pricing / PKKU",p:0,q:"Tahapan pertama dalam penerapan PKKU menurut PMK 172/2023 adalah...",o:["menentukan metode Penentuan Harga Transfer","mengidentifikasi Transaksi yang Dipengaruhi Hubungan Istimewa dan Pihak Afiliasi","menerapkan metode penentuan harga","melakukan analisis kesebandingan"],c:1,e:"Tahapan pertama PKKU adalah mengidentifikasi Transaksi yang Dipengaruhi Hubungan Istimewa dan Pihak Afiliasi, diikuti analisis industri, analisis kondisi transaksi, kesebandingan, penentuan metode, dan penerapannya."},
+{bab:"BAB 14 - Transfer Pricing / PKKU",p:0,q:"Dalam hal tersedia pembanding internal dan eksternal dengan tingkat kesebandingan yang sama, maka yang dipilih dan digunakan adalah...",o:["pembanding eksternal","pembanding internal","keduanya digabung rata-rata","pembanding dari negara lain"],c:1,e:"Jika tersedia pembanding internal dan eksternal dengan tingkat kesebandingan dan keandalan yang sama, pembanding internal yang dipilih dan digunakan."},
+{bab:"BAB 14 - Transfer Pricing / PKKU",p:0,q:"Contoh \"shareholder activity\" yang tidak dapat dibebankan sebagai biaya jasa intra-grup adalah...",o:["biaya rapat pemegang saham entitas induk","biaya pelatihan karyawan operasional","biaya produksi barang sehari-hari","biaya pemasaran produk lokal"],c:0,e:"Shareholder activity adalah aktivitas untuk kepentingan pemegang saham semata, contohnya biaya administrasi entitas induk seperti rapat pemegang saham, bukan jasa yang memberi manfaat nyata ke penerima jasa."},
+{bab:"BAB 14 - Transfer Pricing / PKKU",p:0,q:"Rentang kewajaran yang terbentuk dari tiga atau lebih pembanding disebut...",o:["full range","interquartile range","single point","arm's length point"],c:1,e:"Rentang kewajaran dari dua pembanding disebut full range (minimum-maksimum), sedangkan dari tiga atau lebih pembanding disebut interquartile range (kuartil 1 - kuartil 3)."},
+
+{bab:"BAB 15 - Ekstensifikasi & WP Belum Terdaftar",p:0,q:"SP2DK bagi Wajib Pajak belum terdaftar dapat disampaikan melalui, KECUALI...",o:["Portal WP","Pos/kurir","Visit ke lokasi WP","Media sosial pribadi petugas pajak"],c:3,e:"Penyampaian SP2DK dilakukan melalui saluran resmi: Akun WP/Portal, pos/jasa ekspedisi/kurir, atau secara langsung dengan Berita Acara — bukan melalui media sosial pribadi petugas."},
+{bab:"BAB 15 - Ekstensifikasi & WP Belum Terdaftar",p:0,q:"Jika WP belum terdaftar tidak memberikan tanggapan atau tidak ditemukan, tim ekstensifikasi dapat mengusulkan...",o:["pemberian NPWP secara jabatan","pencabutan status subjek pajak secara otomatis","pemblokiran rekening langsung tanpa proses","tidak ada tindak lanjut sama sekali"],c:0,e:"Salah satu hasil kegiatan P2DK adalah pemberian NPWP dan/atau NITKU secara jabatan terhadap WP yang telah memenuhi syarat subjektif dan objektif namun belum mendaftarkan diri."},
+{bab:"BAB 15 - Ekstensifikasi & WP Belum Terdaftar",p:0,q:"Simpulan akhir BAP2DK dapat berupa, antara lain...",o:["Wajib Pajak setuju dengan nilai potensi hasil pembahasan akhir","Wajib Pajak otomatis dikenai sanksi pidana","NPWP otomatis dihapus tanpa proses","SPT otomatis terkirim ke sistem"],c:0,e:"Simpulan akhir BAP2DK mencakup antara lain: WP tidak ditemukan/meninggal/SPLN, tidak ada potensi, WP tidak hadir pembahasan, atau WP setuju/tidak setuju dengan nilai potensi hasil pembahasan akhir."},
+{bab:"BAB 15 - Ekstensifikasi & WP Belum Terdaftar",p:0,q:"Rekomendasi tindak lanjut LHP2DK berupa \"Usul IDLP\" diberikan dalam hal Wajib Pajak...",o:["memiliki indikasi tindak pidana di bidang perpajakan","telah membayar lunas seluruh potensi pajak","tidak memiliki NPWP sama sekali","mengajukan permohonan keberatan"],c:0,e:"Usul IDLP (pengembangan dan analisis informasi, data, laporan, dan pengaduan) diberikan sebagai rekomendasi LHP2DK dalam hal WP memiliki indikasi tindak pidana di bidang perpajakan."},
+
+{bab:"BAB 16 - Ketentuan Terbaru (PP 20/2026)",p:1,q:"Menurut Pasal 20A PP 20/2026, pengeluaran berupa suap, gratifikasi, dan/atau pemberian lain terkait tindak pidana korupsi/suap...",o:["dapat dikurangkan sebagai biaya 3M jika didukung bukti memadai","bukan merupakan biaya yang dapat menjadi pengurang penghasilan bruto","dapat dibiayakan sebesar 50% dari nilainya","hanya berlaku untuk pemberian kepada pejabat dalam negeri"],c:1,e:"Pasal 20A PP 20/2026 menegaskan bahwa pengeluaran berupa suap, gratifikasi, dan/atau pemberian lain terkait tindak pidana korupsi/suap (termasuk ke pejabat publik asing) bukan merupakan biaya untuk mendapatkan, menagih, dan memelihara penghasilan (non-deductible)."},
+{bab:"BAB 16 - Ketentuan Terbaru (PP 20/2026)",p:1,q:"PP 20/2026 mengubah kriteria penentuan peredaran bruto subjek PPh Final 0,5% (WP PBT) menjadi berdasarkan...",o:["seluruh peredaran bruto termasuk yang dikenai PPh final dan non-final","peredaran bruto atas penghasilan usaha yang dikenai PPh Final 0,5% saja","laba bersih usaha dalam satu tahun pajak","total aset usaha yang dimiliki WP"],c:1,e:"Berbeda dari PP 55/2022 yang menghitung seluruh peredaran bruto (final & non-final, termasuk luar negeri), PP 20/2026 (Pasal 58) hanya menghitung peredaran bruto atas penghasilan usaha yang dikenai PPh Final 0,5% saja."},
+{bab:"BAB 16 - Ketentuan Terbaru (PP 20/2026)",p:0,q:"PP 20/2026 menghapus jangka waktu tertentu pemanfaatan PPh Final 0,5% bagi...",o:["WP Badan skala besar","WP Orang Pribadi dan Perseroan Perorangan (PT OP)","WP Instansi Pemerintah","Koperasi simpan pinjam baru"],c:1,e:"Pasal 59 PP 20/2026 menghapus jangka waktu tertentu (7 tahun WP OP, 4 tahun PT OP) yang sebelumnya diatur PP 55/2022; pemanfaatan kini berlaku sampai WP tidak lagi memenuhi kriteria subjek atau memilih tarif umum."},
+{bab:"BAB 16 - Ketentuan Terbaru (PP 20/2026)",p:0,q:"Salah satu subjek yang dikecualikan dari PPh Final 0,5% WP PBT menurut PP 20/2026 adalah...",o:["PT Perorangan yang dibentuk WP OP bergelar keahlian khusus untuk memecah penghasilan jasa sejenis pekerjaan bebas","seluruh UMKM tanpa kecuali","WP Orang Pribadi yang baru terdaftar","Koperasi simpan pinjam baru"],c:0,e:"PP 20/2026 menambahkan pengecualian anti-penghindaran pajak: PT Perorangan yang dibentuk oleh WP OP berkeahlian khusus untuk menyerahkan jasa sejenis pekerjaan bebas agar dapat menikmati tarif final 0,5% tidak dapat menggunakan skema ini."},
+
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:1,q:"PMK 111 Tahun 2025 tentang Pengawasan Kepatuhan Wajib Pajak mulai berlaku pada tanggal...",o:["1 Januari 2026","1 Januari 2025","17 Agustus 2025","1 Juli 2025"],c:0,e:"Pasal 30 PMK 111/2025 menetapkan PMK ini mulai berlaku 1 Januari 2026; sejak tanggal tersebut seluruh kegiatan Pengawasan mengikuti tata cara dalam PMK ini."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:1,q:"Dokumen yang menutup rangkaian kegiatan SP2DK bagi WP TERDAFTAR adalah...",o:["SP3-P2DK","SPHPP","LHP2DK","SKPKB"],c:0,e:"Alur SP2DK WP Terdaftar berakhir dengan SP3-P2DK (Surat Pemberitahuan Perkembangan Pelaksanaan P2DK), berbeda dari WP Belum Terdaftar yang melalui SPHPP dan berakhir di LHP2DK."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:1,q:"Dokumen yang menjadi penanda Step 2 dalam alur SP2DK bagi WP BELUM TERDAFTAR adalah...",o:["SPHPP (Surat Pemberitahuan Hasil Pengujian/Pengawasan)","SP3-P2DK","Risalah Pembahasan","Surat Ketetapan Pajak Nihil"],c:0,e:"Alur WP Belum Terdaftar memiliki 2 tahap: Step 1 (SP2DK - Tanggapan WP), Step 2 (SPHPP - Undangan Pembahasan - BAP2DK - LHP2DK); berbeda dari WP Terdaftar yang cukup 1 tahap hingga SP3-P2DK."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Tiga bentuk kegiatan Pengawasan WP Terdaftar menurut PMK 111/2025 adalah...",o:["SP2DK, Surat Imbauan, dan Surat Teguran","SP2DK, SPHP, dan LHP","Pemeriksaan, Penyidikan, dan Penagihan","SKPKB, SKPLB, dan SKPN"],c:0,e:"Tiga instrumen utama Pengawasan WP Terdaftar adalah permintaan penjelasan (SP2DK), penyampaian imbauan, dan pemberian teguran, masing-masing diatur dalam Bagian Kesatu BAB III PMK 111/2025."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:1,q:"Surat Teguran dalam kerangka Pengawasan diterbitkan khusus dalam hal...",o:["SPT tidak disampaikan sesuai batas waktu dan/atau pelaksanaan ketentuan perpajakan lainnya","WP terlambat membayar pajak tahun berjalan","WP mengajukan keberatan","WP melakukan merger usaha"],c:0,e:"Berbeda dari SP2DK dan Imbauan yang mencakup enam area kewajiban, Surat Teguran diterbitkan khusus untuk SPT yang tidak disampaikan sesuai batas waktu serta pelaksanaan ketentuan perpajakan lainnya."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"SP2DK dan Surat Imbauan bagi WP Terdaftar dapat disampaikan melalui saluran berikut, KECUALI...",o:["media sosial resmi KPP","Akun WP","pos elektronik","faksimile"],c:0,e:"Saluran resmi meliputi Akun WP, pos elektronik, pos/ekspedisi/kurir, faksimile, dan langsung dengan Berita Acara; media sosial bukan saluran resmi penyampaian menurut PMK 111/2025."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:1,q:"Perbedaan saluran penyampaian SP2DK bagi WP Belum Terdaftar dibanding WP Terdaftar adalah...",o:["WP Belum Terdaftar hanya 3 kanal (Akun WP, pos/ekspedisi/kurir, langsung) tanpa pos elektronik dan faksimile","keduanya menggunakan kanal yang persis sama","WP Belum Terdaftar hanya dapat dihubungi lewat media sosial","WP Belum Terdaftar tidak memiliki saluran resmi sama sekali"],c:0,e:"WP Belum Terdaftar disampaikan melalui 3 kanal saja, karena pos elektronik/faksimilenya belum tentu tervalidasi dalam sistem administrasi DJP."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Dalam hal penyampaian SP2DK secara langsung namun WP tidak ditemukan atau tidak bersedia menerima, maka Berita Acara...",o:["hanya ditandatangani oleh AR/pegawai DJP yang ditugaskan, dan WP dianggap menerima SP2DK tanpa memberi tanggapan","dianggap batal demi hukum","harus diulang keesokan harinya di lokasi yang sama","ditandatangani oleh ketua RT setempat sebagai saksi"],c:0,e:"Jika WP tidak ditemukan/tidak bersedia menerima, BA hanya ditandatangani petugas, dan WP dianggap telah menerima SP2DK namun tidak memberikan tanggapan."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Pengawasan menurut PMK 111/2025 dapat dilaksanakan melalui dua mekanisme, yaitu...",o:["penugasan kepada AR/pegawai DJP, atau secara otomatis melalui sistem administrasi DJP","manual dan semi-otomatis","pemeriksaan dan penyidikan","permohonan WP dan inisiatif DJP"],c:0,e:"Pasal 21 PMK 111/2025 mengatur Pengawasan dilakukan melalui penugasan (Surat Perintah Pengawasan) kepada AR/pegawai DJP, atau secara otomatis melalui sistem administrasi DJP, contohnya surat teguran SPT otomatis."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Kewajiban AR/pegawai DJP yang ditugaskan dalam kegiatan Pengawasan antara lain...",o:["memperlihatkan tanda pengenal pegawai dan Surat Perintah Pengawasan, serta memberikan penjelasan terkait kegiatan yang dilakukan","meminta imbalan jasa dari Wajib Pajak","menyita barang WP tanpa prosedur","menandatangani sendiri seluruh dokumen milik WP"],c:0,e:"Pasal 23 PMK 111/2025 mewajibkan AR/pegawai DJP memperlihatkan identitas dan dasar penugasan serta memberi penjelasan; sebaliknya WP berhak memintanya."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Ruang lingkup Pengawasan menurut Pasal 3 PMK 111/2025 terdiri atas tiga kelompok, yaitu...",o:["WP Terdaftar, WP Belum Terdaftar, dan Pengawasan Wilayah","Pengawasan Pajak Pusat, Daerah, dan Internasional","Pengawasan Formal, Material, dan Administratif","Pengawasan Rutin, Khusus, dan Insidentil"],c:0,e:"Tiga kelompok ruang lingkup Pengawasan adalah WP Terdaftar, WP Belum Terdaftar, dan Pengawasan Wilayah (pengawasan kegiatan ekonomi serta identifikasi WP di wilayah kerja)."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Kegiatan Pengumpulan Data Ekonomi dalam Pengawasan Wilayah dilakukan melalui hal berikut, KECUALI...",o:["audit menyeluruh atas laporan keuangan Wajib Pajak","pengamatan kegiatan ekonomi","wawancara","geotagging dan pengambilan gambar"],c:0,e:"Kegiatan Pengawasan Wilayah berupa pengamatan kegiatan ekonomi, wawancara, geotagging, dan pengambilan gambar; audit laporan keuangan menyeluruh merupakan ranah pemeriksaan, bukan pengawasan wilayah."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"PMK 111/2025 memberikan pengecualian ruang lingkup pengawasan untuk dua hal, yaitu...",o:["Pajak Minimum Global dan kewajiban lapor SPOP PBB, yang masing-masing mengikuti PMK tersendiri","PPh dan PPN","WP Badan dan WP Orang Pribadi","Pajak Pusat dan Pajak Daerah"],c:0,e:"Pengawasan terkait Pajak Minimum Global mengikuti PMK Pajak Minimum Global, sedangkan kewajiban lapor SPOP PBB mengikuti PMK PSIAP (Pembaruan Sistem Inti Administrasi Perpajakan)."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Jika tanggapan WP atas SP2DK sudah sesuai tanpa perlu pembahasan lebih lanjut, dokumen yang dibuat adalah...",o:["Berita Acara Pelaksanaan Permintaan Penjelasan atas Data dan/atau Keterangan (BAP2DK)","SPHP","Risalah Keberatan","Surat Ketetapan Pajak"],c:0,e:"Pasal 6 ayat (10) PMK 111/2025: dalam hal tanggapan WP telah sesuai, dibuatkan BA Pelaksanaan P2DK (BAP2DK) tanpa perlu tahap pembahasan lebih lanjut."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Kegiatan pendukung Pengawasan menurut Pasal 4 PMK 111/2025 meliputi hal berikut, KECUALI...",o:["menyita aset Wajib Pajak secara langsung","pengusulan penilaian untuk tujuan perpajakan","pembahasan dengan pihak internal Direktorat Jenderal Pajak","permintaan data/keterangan kepada pihak ketiga"],c:0,e:"Kegiatan pendukung Pengawasan bersifat administratif/persiapan (penilaian, pembahasan internal, permintaan data pihak ketiga); penyitaan aset merupakan tindakan penagihan, bukan kegiatan pengawasan."},
+{bab:"BAB 12 - Pengawasan Kepatuhan Wajib Pajak",p:0,q:"Dasar hukum penyusunan PMK 111/2025 mengacu pada UU KUP, khususnya...",o:["Pasal 10 ayat (2) tentang tata cara pembayaran/pelaporan dan Pasal 44E ayat (2) tentang tata cara pendaftaran NPWP/pengukuhan PKP","Pasal 17B tentang pengembalian pendahuluan","Pasal 36 tentang pengurangan sanksi administratif","Pasal 44 tentang penyidikan tindak pidana"],c:0,e:"UU KUP Pasal 10 ayat (2) dan Pasal 44E ayat (2) mengamanatkan tata cara pemenuhan kewajiban diatur dengan PMK, sehingga pengawasannya memerlukan ketentuan yang setara."},
+
+{bab:"BAB 17 - Level Kemahiran & SKJ Manajerial",p:0,q:"Lima level kemahiran kompetensi ASN sesuai Permenpan 38/2017 dimulai dari Level 1 yang disebut...",o:["Paham/dalam pengembangan","Dasar","Menengah","Ahli"],c:0,e:"Urutan 5 level kemahiran adalah: Level 1 Paham/dalam pengembangan, Level 2 Dasar, Level 3 Menengah, Level 4 Mumpuni, Level 5 Ahli."},
+{bab:"BAB 17 - Level Kemahiran & SKJ Manajerial",p:0,q:"Level kemahiran kompetensi \"Ahli\" berada pada level ke...",o:["3","4","5","2"],c:2,e:"Level kemahiran \"Ahli\" adalah level tertinggi, yaitu Level 5, sesuai Permenpan 38/2017."},
+{bab:"BAB 17 - Level Kemahiran & SKJ Manajerial",p:0,q:"Level kemahiran kompetensi \"Mumpuni\" berada pada level ke...",o:["2","3","4","5"],c:2,e:"Urutan level kemahiran: 1 Paham, 2 Dasar, 3 Menengah, 4 Mumpuni, 5 Ahli — sehingga \"Mumpuni\" berada di Level 4."},
+{bab:"BAB 17 - Level Kemahiran & SKJ Manajerial",p:0,q:"Pada SKJ Kompetensi Manajerial, jenjang Jabatan Fungsional Ahli Pertama umumnya dituntut berada pada level...",o:["1","2","3","4"],c:1,e:"Sesuai tabel SKJ, jenjang Ahli Pertama berada pada Level 2 untuk hampir seluruh kompetensi manajerial dan sosial kultural."},
+{bab:"BAB 17 - Level Kemahiran & SKJ Manajerial",p:0,q:"Pada SKJ Kompetensi Manajerial, jenjang Jabatan Fungsional Ahli Muda umumnya dituntut berada pada level...",o:["2","3","4","5"],c:1,e:"Sesuai tabel SKJ, jenjang Ahli Muda berada pada Level 3 untuk hampir seluruh kompetensi manajerial dan sosial kultural."},
+{bab:"BAB 17 - Level Kemahiran & SKJ Manajerial",p:0,q:"Pada SKJ Kompetensi Manajerial, jenjang Jabatan Fungsional Ahli Madya umumnya dituntut berada pada level...",o:["2","3","4","5"],c:2,e:"Sesuai tabel SKJ, jenjang Ahli Madya berada pada Level 4 untuk hampir seluruh kompetensi manajerial dan sosial kultural."},
+{bab:"BAB 17 - Level Kemahiran & SKJ Manajerial",p:1,q:"Dari 9 kompetensi dalam SKJ, dua kompetensi yang levelnya terus naik hingga Level 5 pada jenjang Ahli Utama adalah...",o:["Integritas dan Perekat Bangsa","Kerjasama dan Komunikasi","Pelayanan Publik dan Mengelola Perubahan","Orientasi pada Hasil dan Pengambilan Keputusan"],c:0,e:"Hanya Integritas dan Perekat Bangsa yang levelnya mencapai Level 5 di jenjang Ahli Utama; 7 kompetensi manajerial lainnya mentok di Level 4 meski sudah Ahli Utama."},
+{bab:"BAB 17 - Level Kemahiran & SKJ Manajerial",p:1,q:"Tujuh dari sembilan kompetensi (selain Integritas dan Perekat Bangsa) pada jenjang Ahli Utama levelnya tertinggi hanya mencapai Level...",o:["3","4","5","2"],c:1,e:"Tujuh kompetensi manajerial lainnya (Kerjasama, Komunikasi, Orientasi pada Hasil, Pelayanan Publik, Pengembangan Diri & Orang Lain, Mengelola Perubahan, Pengambilan Keputusan) hanya mencapai Level 4 meski di jenjang Ahli Utama."},
+{bab:"BAB 17 - Level Kemahiran & SKJ Manajerial",p:0,q:"Standar Kompetensi Jabatan (SKJ) merupakan...",o:["persyaratan kompetensi minimal yang harus dimiliki ASN dalam menjalankan tugas jabatannya","daftar gaji pokok pegawai sesuai golongan","jadwal pelatihan tahunan instansi","daftar hadir pegawai dalam satu tahun"],c:0,e:"SKJ adalah persyaratan kompetensi minimal yang harus dimiliki seorang ASN dalam menjalankan tugas jabatan, sesuai Permenpan 38/2017."},
+{bab:"BAB 17 - Level Kemahiran & SKJ Manajerial",p:0,q:"Total kompetensi yang dibahas dalam kamus kompetensi manajerial dan sosial kultural ASN adalah...",o:["7 kompetensi","8 kompetensi","9 kompetensi (8 manajerial + 1 sosial kultural)","10 kompetensi"],c:2,e:"Terdapat 8 kompetensi manajerial (Integritas, Kerjasama, Komunikasi, Orientasi pada Hasil, Pelayanan Publik, Pengembangan Diri & Orang Lain, Mengelola Perubahan, Pengambilan Keputusan) ditambah 1 kompetensi sosial kultural (Perekat Bangsa) — total 9."},
+{bab:"BAB 17 - Level Kemahiran & SKJ Manajerial",p:0,q:"Level kemahiran kompetensi \"Dasar\" berada pada level ke...",o:["1","2","3","4"],c:1,e:"Level kemahiran \"Dasar\" adalah Level 2, setelah Level 1 (Paham/dalam pengembangan) dan sebelum Level 3 (Menengah)."},
+
+{bab:"BAB 18 - 8 Kompetensi Manajerial ASN",p:0,q:"Kompetensi yang didefinisikan sebagai \"konsisten berperilaku selaras dengan nilai, norma, dan/atau etika organisasi, jujur dalam hubungan dengan manajemen, rekan kerja, dan pemangku kepentingan\" adalah...",o:["Integritas","Kerjasama","Komunikasi","Pengambilan Keputusan"],c:0,e:"Definisi tersebut persis merujuk pada kompetensi Integritas dalam kamus kompetensi manajerial ASN."},
+{bab:"BAB 18 - 8 Kompetensi Manajerial ASN",p:0,q:"Kompetensi \"kemampuan menjalin, membina, mempertahankan hubungan kerja yang efektif serta mengoptimalkan sumber daya untuk tujuan strategis organisasi\" adalah...",o:["Kerjasama","Mengelola Perubahan","Orientasi pada Hasil","Pelayanan Publik"],c:0,e:"Definisi tersebut adalah definisi kompetensi Kerjasama."},
+{bab:"BAB 18 - 8 Kompetensi Manajerial ASN",p:0,q:"Pada Level 3 kompetensi Komunikasi, indikator perilaku kuncinya adalah...",o:["berkomunikasi secara asertif untuk menyampaikan informasi yang sensitif/rumit/kompleks","menyampaikan informasi dengan jelas dan lengkap saja","menggagas sistem komunikasi strategis tingkat nasional","mengemukakan pemikiran multidimensi secara tertulis"],c:0,e:"Level 3 Komunikasi ditandai kemampuan berkomunikasi secara asertif, menyampaikan informasi sensitif/rumit/kompleks dengan cara yang tepat agar mudah dipahami."},
+{bab:"BAB 18 - 8 Kompetensi Manajerial ASN",p:0,q:"Kompetensi \"mempertahankan komitmen pribadi yang tinggi untuk menyelesaikan tugas, dapat diandalkan, serta mampu mengidentifikasi risiko dan peluang\" adalah...",o:["Orientasi pada Hasil","Integritas","Pelayanan Publik","Kerjasama"],c:0,e:"Definisi ini merujuk pada kompetensi Orientasi pada Hasil."},
+{bab:"BAB 18 - 8 Kompetensi Manajerial ASN",p:1,q:"Prinsip utama kompetensi Pelayanan Publik adalah melaksanakan tugas secara profesional dan transparan, serta...",o:["objektif, netral, tidak memihak, dan tidak diskriminatif","mengutamakan keuntungan pribadi","berpihak pada kelompok tertentu","berdasarkan kedekatan personal"],c:0,e:"Kompetensi Pelayanan Publik menuntut pelaksanaan tugas pemerintahan/pelayanan publik secara profesional, transparan, objektif, netral, tidak memihak, dan tidak diskriminatif."},
+{bab:"BAB 18 - 8 Kompetensi Manajerial ASN",p:0,q:"Pada Level 2 kompetensi Pengembangan Diri dan Orang Lain, indikator kuncinya adalah...",o:["meningkatkan kemampuan bawahan dengan memberi contoh dan penjelasan cara melaksanakan pekerjaan","menyusun program pengembangan jangka panjang tingkat instansi","menjadi role model nasional dalam pengembangan SDM","menciptakan budaya belajar berkelanjutan tingkat instansi"],c:0,e:"Level 2 Pengembangan Diri dan Orang Lain ditandai kemampuan meningkatkan kemampuan bawahan melalui contoh, instruksi, dan penjelasan praktis."},
+{bab:"BAB 18 - 8 Kompetensi Manajerial ASN",p:0,q:"Kompetensi \"menyesuaikan diri dengan situasi baru atau berubah dan tidak bergantung secara berlebihan pada metode lama\" adalah...",o:["Mengelola Perubahan","Pengambilan Keputusan","Komunikasi","Integritas"],c:0,e:"Definisi tersebut merujuk pada kompetensi Mengelola Perubahan."},
+{bab:"BAB 18 - 8 Kompetensi Manajerial ASN",p:0,q:"Pada Level 3 kompetensi Pengambilan Keputusan, fokus indikator perilakunya adalah...",o:["membandingkan berbagai alternatif serta menyeimbangkan risiko dan keberhasilan implementasi","mengumpulkan informasi dasar untuk bertindak sesuai kewenangan","menghasilkan solusi strategis berdampak nasional","menyelesaikan masalah berisiko tinggi lintas fungsi"],c:0,e:"Level 3 Pengambilan Keputusan ditandai kemampuan membandingkan berbagai alternatif tindakan dan implikasinya, serta menyeimbangkan risiko dan keberhasilan implementasi."},
+{bab:"BAB 18 - 8 Kompetensi Manajerial ASN",p:0,q:"Level 3 kompetensi Kerjasama ditandai dengan kemampuan...",o:["efektif membangun tim kerja untuk peningkatan kinerja organisasi","berpartisipasi sebagai anggota tim yang baik","menciptakan situasi kerja sama lintas instansi secara konsisten","membangun komitmen tim dan sinergi antarunit"],c:0,e:"Level 3 Kerjasama ditandai kemampuan melihat kekuatan/kelemahan anggota tim, membentuk tim yang tepat, dan mencari solusi optimal untuk peningkatan kinerja organisasi."},
+{bab:"BAB 18 - 8 Kompetensi Manajerial ASN",p:0,q:"Level 3 kompetensi Integritas ditandai dengan kemampuan untuk...",o:["memastikan dan menanamkan keyakinan bersama agar anggota yang dipimpin bertindak sesuai nilai, norma, dan etika organisasi dalam lingkup formal","bertindak sesuai nilai dan norma dalam kapasitas pribadi saja","menjadi role model standar etika di tingkat nasional","menciptakan situasi kerja yang mendorong kepatuhan seluruh pemangku kepentingan"],c:0,e:"Level 3 Integritas ditandai kemampuan memastikan dan menanamkan keyakinan bersama agar anggota yang dipimpin bertindak sesuai nilai, norma, dan etika organisasi dalam lingkup formal (unit kerja)."},
+{bab:"BAB 18 - 8 Kompetensi Manajerial ASN",p:0,q:"Level 3 kompetensi Orientasi pada Hasil ditandai dengan...",o:["menetapkan target kerja yang menantang bagi unit kerja, serta memberi apresiasi dan teguran untuk mendorong kinerja","bertanggung jawab memenuhi standar kerja pribadi","mendorong unit kerja mencapai target melebihi hasil sebelumnya","meningkatkan mutu pencapaian kerja organisasi secara nasional"],c:0,e:"Level 3 Orientasi pada Hasil ditandai kemampuan menetapkan target kinerja unit yang lebih tinggi dari standar organisasi serta memberi apresiasi/teguran untuk mendorong pencapaian hasil."},
+
+{bab:"BAB 19 - Kompetensi Sosial Kultural & Nilai Kemenkeu",p:0,q:"Nama kompetensi sosial kultural dalam kamus kompetensi ASN adalah...",o:["Perekat Bangsa","Pelayanan Publik","Kerjasama Lintas Budaya","Integritas Sosial"],c:0,e:"Kompetensi Sosial Kultural dalam kamus kompetensi ASN diberi nama \"Perekat Bangsa\"."},
+{bab:"BAB 19 - Kompetensi Sosial Kultural & Nilai Kemenkeu",p:1,q:"Kompetensi Sosial Kultural berkaitan dengan pengetahuan, keterampilan, dan sikap terkait pengalaman berinteraksi dengan...",o:["masyarakat majemuk (keberagaman)","rekan kerja satu divisi saja","atasan langsung","Wajib Pajak badan usaha besar"],c:0,e:"Kompetensi Sosial Kultural terkait pengalaman berinteraksi dengan masyarakat majemuk, mencakup keberagaman agama, suku-budaya, gender, sosial ekonomi, preferensi politik, dan wawasan kebangsaan."},
+{bab:"BAB 19 - Kompetensi Sosial Kultural & Nilai Kemenkeu",p:0,q:"Pada jenjang Pelaksana/JF Pemula, level Kompetensi Sosial Kultural yang dituntut adalah...",o:["Level 1 (Paham)","Level 2 (Dasar)","Level 3 (Menengah)","Level 4 (Mumpuni)"],c:0,e:"Jenjang Pelaksana dan JF Pemula dituntut pada Level 1 (Paham/dalam pengembangan) untuk kompetensi Sosial Kultural."},
+{bab:"BAB 19 - Kompetensi Sosial Kultural & Nilai Kemenkeu",p:0,q:"Pada jenjang JPT Madya/JF Utama, level Kompetensi Sosial Kultural yang dituntut adalah...",o:["Level 3 (Menengah)","Level 4 (Mumpuni)","Level 5 (Ahli)","Level 2 (Dasar)"],c:2,e:"Jenjang JPT Madya dan JF Utama dituntut pada Level 5 (Ahli) — menjadi wakil pemerintah untuk membangun hubungan sosial-psikologis dengan masyarakat."},
+{bab:"BAB 19 - Kompetensi Sosial Kultural & Nilai Kemenkeu",p:1,q:"5 Nilai Kemenkeu yang menjadi pedoman utama bekerja adalah...",o:["Integritas, Profesionalisme, Sinergi, Pelayanan, Kesempurnaan","Jujur, Disiplin, Tanggung Jawab, Adil, Peduli","Cepat, Tepat, Akurat, Transparan, Efisien","Amanah, Kompeten, Harmonis, Loyal, Adaptif"],c:0,e:"5 Nilai Kemenkeu (Integrity-Professionalism-Synergy-Service-Excellence) adalah Integritas, Profesionalisme, Sinergi, Pelayanan, dan Kesempurnaan — pedoman utama bekerja yang sejalan dengan Kode Etik dan Bela Negara."},
+{bab:"BAB 19 - Kompetensi Sosial Kultural & Nilai Kemenkeu",p:0,q:"Pernyataan \"Kemenkeu akan menjadi institusi yang living the values, not only printing the values\" dikemukakan oleh...",o:["Sri Mulyani Indrawati","Suryo Utomo","Prabowo Subianto","Basuki Hadimuljono"],c:0,e:"Pernyataan tersebut dikemukakan oleh Menteri Keuangan Sri Mulyani Indrawati sebagai penegasan implementasi Nilai-Nilai Kemenkeu."},
+{bab:"BAB 19 - Kompetensi Sosial Kultural & Nilai Kemenkeu",p:0,q:"Nilai Kemenkeu yang tercermin dari perilaku \"bekerja dengan hati, peka dan empati terhadap perbedaan, serta bersikap tenang dalam menghadapi konflik\" adalah...",o:["Integritas","Sinergi","Pelayanan","Kesempurnaan"],c:0,e:"Perilaku tersebut mencerminkan nilai Integritas, yang menekankan bekerja dengan hati dan mengutamakan kepentingan bangsa di atas kepentingan pribadi."},
+{bab:"BAB 19 - Kompetensi Sosial Kultural & Nilai Kemenkeu",p:0,q:"Nilai Kemenkeu yang tercermin dari perilaku \"menjaga martabat, menjunjung tinggi toleransi, serta bijak bermedia sosial dan tidak melakukan bullying\" adalah...",o:["Kesempurnaan (Excellence)","Profesionalisme","Sinergi","Integritas"],c:0,e:"Perilaku menjaga martabat, toleransi, dan bijak bermedia sosial mencerminkan nilai Kesempurnaan (Excellence)."},
+{bab:"BAB 19 - Kompetensi Sosial Kultural & Nilai Kemenkeu",p:0,q:"Contoh kegiatan sosial internal Kemenkeu yang disebutkan dalam materi keberagaman adalah...",o:["Kemenkeu Mengajar dan Seminggu Bersama Keluarga Kemenkeu (SBKK)","Rapat Kerja Nasional Kemenkeu","Pekan Olahraga Kemenkeu","Hari Pajak Nasional"],c:0,e:"Dua contoh kegiatan sosial internal Kemenkeu yang disebutkan adalah Kemenkeu Mengajar dan Seminggu Bersama Keluarga Kemenkeu (SBKK)."},
+{bab:"BAB 19 - Kompetensi Sosial Kultural & Nilai Kemenkeu",p:0,q:"Level Kompetensi Sosial Kultural pada jenjang Jabatan Administrator/JF Penyelia/JF Muda berada pada...",o:["Level 3 (Menengah)","Level 1 (Paham)","Level 4 (Mumpuni)","Level 5 (Ahli)"],c:0,e:"Jenjang Jabatan Administrator, JF Penyelia, dan JF Muda dituntut pada Level 3 (Menengah) — mempromosikan dan mengembangkan sikap toleransi dan persatuan."},
+{bab:"BAB 19 - Kompetensi Sosial Kultural & Nilai Kemenkeu",p:0,q:"Indikator Level 3 kompetensi Perekat Bangsa ditandai dengan kemampuan...",o:["mempromosikan sikap menghargai perbedaan serta memetakan potensi kesalahpahaman karena keragaman budaya","hanya memahami dan menerima kemajemukan secara pasif","menjadi wakil pemerintah di tingkat nasional","mendayagunakan perbedaan untuk tujuan organisasi semata"],c:0,e:"Level 3 Perekat Bangsa ditandai kemampuan mempromosikan sikap menghargai perbedaan, melakukan pemetaan sosial, dan menjadi mediator penyelesaian konflik/potensi konflik akibat keragaman budaya."},
+
+{bab:"BAB 20 - Assessment Center, Self-Assessment & Pengembangan Kompetensi",p:0,q:"LIAC merupakan singkatan dari...",o:["Laporan Individual Assessment Center","Laporan Indeks Akuntabilitas Capaian","Lembar Isian Analisis Capaian","Laporan Integrasi Analisis Center"],c:0,e:"LIAC adalah singkatan dari Laporan Individual Assessment Center, laporan hasil pengolahan data Assessment Center terhadap Assessee."},
+{bab:"BAB 20 - Assessment Center, Self-Assessment & Pengembangan Kompetensi",p:0,q:"LIAC dibuat oleh...",o:["Assessor, berdasarkan bukti perilaku dari Pengambilan Data (Intake) dan Assessor Meeting","Assessee itu sendiri secara mandiri","Atasan langsung tanpa proses penilaian","Bagian kepegawaian tanpa data pendukung"],c:0,e:"LIAC dibuat oleh Assessor berdasarkan bukti perilaku yang diperoleh selama Pengambilan Data (Intake) dan hasil Assessor Meeting."},
+{bab:"BAB 20 - Assessment Center, Self-Assessment & Pengembangan Kompetensi",p:0,q:"LIAC dapat diakses oleh pegawai melalui...",o:["HRIS masing-masing pegawai","aplikasi DJP Online","portal e-Faktur","aplikasi Coretax"],c:0,e:"LIAC dapat diakses melalui HRIS masing-masing pegawai di hris.e-prime.kemenkeu.go.id."},
+{bab:"BAB 20 - Assessment Center, Self-Assessment & Pengembangan Kompetensi",p:1,q:"Berikut ini yang BUKAN merupakan tujuan Self-Assessment adalah...",o:["menetapkan sanksi disiplin pegawai","mengetahui gap kompetensi","mengukur kualitas pekerjaan","mengukur tingkat pencapaian kinerja"],c:0,e:"4 tujuan Self-Assessment adalah mengetahui gap kompetensi, mengetahui cara menyelesaikan masalah, mengukur kualitas pekerjaan, dan mengukur pencapaian kinerja — bukan untuk menetapkan sanksi disiplin."},
+{bab:"BAB 20 - Assessment Center, Self-Assessment & Pengembangan Kompetensi",p:0,q:"Langkah pertama dalam melakukan Self-Assessment adalah...",o:["memahami Standar Kompetensi Jabatan (SKJ)","langsung mengisi skor pada LIAC","berkonsultasi dengan Assessor eksternal","menunggu hasil Assessment Center resmi"],c:0,e:"Langkah self-assessment diawali dengan memahami SKJ, dilanjutkan memahami definisi kompetensi/indikatornya, mengidentifikasi evidence, lalu mengamati pemenuhan indikator level SKJ."},
+{bab:"BAB 20 - Assessment Center, Self-Assessment & Pengembangan Kompetensi",p:0,q:"Faktor penyebab gap kompetensi karena \"tidak ada kesempatan atau tidak dituntut dalam tugasnya\" disebut...",o:["Lack of Opportunity","Lack of Knowledge","Lack of Motivation","Lack of Resource"],c:0,e:"Lack of Opportunity adalah faktor gap kompetensi karena tidak adanya kesempatan atau tuntutan tugas untuk menunjukkan kompetensi tersebut."},
+{bab:"BAB 20 - Assessment Center, Self-Assessment & Pengembangan Kompetensi",p:0,q:"Faktor penyebab gap kompetensi karena \"belum memahami, relatif baru pada tugasnya\" disebut...",o:["Lack of Knowledge","Lack of Opportunity","Lack of Motivation","Lack of Experience"],c:0,e:"Lack of Knowledge adalah faktor gap kompetensi karena pegawai belum memahami atau relatif baru dalam menjalankan tugasnya."},
+{bab:"BAB 20 - Assessment Center, Self-Assessment & Pengembangan Kompetensi",p:0,q:"Faktor penyebab gap kompetensi karena \"hambatan personal\" disebut...",o:["Lack of Motivation","Lack of Knowledge","Lack of Opportunity","Lack of Supervision"],c:0,e:"Lack of Motivation adalah faktor gap kompetensi yang disebabkan oleh hambatan personal pegawai."},
+{bab:"BAB 20 - Assessment Center, Self-Assessment & Pengembangan Kompetensi",p:1,q:"Model pengembangan kompetensi 70:20:10 mengatur porsi terbesar (70%) untuk...",o:["Experiential Learning","Social Learning","Formal Learning","Digital Learning"],c:0,e:"Model 70:20:10 (PMK 216/2018) mengalokasikan 70% untuk Experiential Learning (praktik langsung di tempat kerja), 20% Social Learning, dan 10% Formal Learning."},
+{bab:"BAB 20 - Assessment Center, Self-Assessment & Pengembangan Kompetensi",p:0,q:"Contoh aktivitas Social Learning (porsi 20%) dalam model 70:20:10 adalah...",o:["coaching, mentoring, benchmarking, dan Community of Practice","diklat dan e-learning","assignment dan job enlargement","secondment dan job enrichment"],c:0,e:"Social Learning (20%) berupa aktivitas pembelajaran kolaboratif seperti coaching, mentoring, benchmarking, Community of Practice, feedback, dan networking."},
+{bab:"BAB 20 - Assessment Center, Self-Assessment & Pengembangan Kompetensi",p:0,q:"Model pengembangan kompetensi 70:20:10 diatur sesuai dengan...",o:["PMK 216/2018","PMK 111/2025","Permenpan 38/2017","PMK 81/2024"],c:0,e:"Model pembelajaran 70:20:10 diterapkan sesuai dengan PMK 216/2018 tentang pengembangan kompetensi pegawai Kementerian Keuangan."}
+];
+
+/* ============================= APP STATE & LOGIC ============================= */
+let activeBab = 0;
+let selectedCount = 20;
+let currentQuiz = [];
+let answeredCount = 0;
+let correctCount = 0;
+let currentTopic = null;
+let currentLevel = null;
+
+/* Peta eksplisit BAB -> tema, mengikuti kompetensi pada materi asli (bukan sekadar rentang nomor):
+   - Pemeriksaan Pajak        : BAB 1-6   (sumber: Pemeriksaan.pdf)
+   - Perpajakan Dasar         : BAB 7-11 & 16 (sumber: bagian "Advokasi Kebijakan Perpajakan" di Pengawasan.pdf + PP 20/2026)
+   - Pengawasan & Analisis    : BAB 12-15 (sumber: Pengawasan.pdf kompetensi Analisis Kepatuhan/Potensi/Ekstensifikasi + Salindia PMK 111/2025)
+   - Mansoskul                : BAB 17-20 (sumber: Mansoskul.pdf) */
+const BAB_TOPIC_MAP = [
+  'pemeriksaan','pemeriksaan','pemeriksaan','pemeriksaan','pemeriksaan','pemeriksaan',
+  'dasar','dasar','dasar','dasar','dasar',
+  'pengawasan','pengawasan','pengawasan','pengawasan',
+  'dasar',
+  'mansoskul','mansoskul','mansoskul','mansoskul'
+];
+const TOPICS = [
+  {key:'pemeriksaan', label:'Pemeriksaan Pajak', sub:'BAB 1-6 · Pemeriksaan.pdf'},
+  {key:'dasar', label:'Perpajakan Dasar', sub:'BAB 7-11, 16 · KUP/PPh/PPN/PBB/Coretax + PP 20/2026'},
+  {key:'pengawasan', label:'Pengawasan & Analisis', sub:'BAB 12-15 · Kepatuhan, Potensi, TP, Ekstensifikasi'},
+  {key:'mansoskul', label:'Mansoskul', sub:'BAB 17-20 · Mansoskul.pdf'},
+  {key:'gabungan', label:'Semua Materi Pajak', sub:'Pemeriksaan + Dasar + Pengawasan (tanpa Mansoskul)'}
+];
+const LEVELS = [
+  {key:1, label:'Level 1', sub:'Dasar · konsep & definisi inti'},
+  {key:2, label:'Level 2', sub:'Menengah · angka, batasan & prosedur'},
+  {key:3, label:'Level 3', sub:'Sulit · pengecualian & kasus bernuansa'}
+];
+/* soal tidak pernah diulang dalam satu kombinasi tema+level sampai pool-nya habis terpakai */
+const usedMap = {};
+function usedKey(topic, level){ return topic+'_L'+level; }
+function getUsedSet(topic, level){
+  const k = usedKey(topic, level);
+  if(!usedMap[k]) usedMap[k] = new Set();
+  return usedMap[k];
+}
+
+function getBabNum(q){ return parseInt(q.bab.match(/BAB (\d+)/)[1], 10); }
+function getTopicOf(q){
+  return BAB_TOPIC_MAP[getBabNum(q)-1] || 'dasar';
+}
+/* tingkat kesulitan dihitung otomatis dari kompleksitas naskah soal (pengecualian "KECUALI",
+   panjang pertanyaan & opsi, rujukan pasal/ayat, syarat majemuk, panjang pembahasan), lalu
+   diklasifikasikan ke Level 1-3 berdasarkan persentil skor seluruh bank soal -> distribusi
+   otomatis seimbang dan konsisten tanpa perlu menandai tiap soal secara manual */
+function rawComplexity(q){
+  let score = 0;
+  if(/KECUALI/i.test(q.q)) score += 3;
+  score += Math.min(3, Math.floor(q.q.length/55));
+  const optLen = q.o.join(' ').length;
+  const avgOptLen = optLen / q.o.length;
+  score += Math.min(3, Math.floor(avgOptLen/20));
+  const pasalMatches = (q.q.match(/Pasal|ayat/gi)||[]).length;
+  score += Math.min(2, pasalMatches);
+  const condWords = (q.q.match(/dan\/atau|serta|meliputi|maupun/gi)||[]).length;
+  score += Math.min(2, condWords);
+  score += Math.min(2, Math.floor((q.e||'').length/150));
+  return score;
+}
+let _diffThresholds = null;
+function getDiffThresholds(){
+  if(_diffThresholds) return _diffThresholds;
+  const sorted = QUESTIONS.map(rawComplexity).slice().sort((a,b)=>a-b);
+  const p1 = sorted[Math.floor(sorted.length*0.34)];
+  const p2 = sorted[Math.floor(sorted.length*0.67)];
+  _diffThresholds = [p1, p2];
+  return _diffThresholds;
+}
+function computeDifficulty(q){
+  const [p1,p2] = getDiffThresholds();
+  const s = rawComplexity(q);
+  if(s <= p1) return 1;
+  if(s <= p2) return 2;
+  return 3;
+}
+function getPool(topic, level){
+  return QUESTIONS.map((q,i)=>Object.assign({_id:i, _lvl:computeDifficulty(q)}, q))
+    .filter(q=> topic==='gabungan' ? getTopicOf(q)!=='mansoskul' : getTopicOf(q)===topic)
+    .filter(q=> !level || q._lvl===level);
+}
+
+function switchTab(tab){
+  document.getElementById('tab-ringkasan').classList.toggle('active', tab==='ringkasan');
+  document.getElementById('tab-latihan').classList.toggle('active', tab==='latihan');
+  document.getElementById('tab-ringkasan').setAttribute('aria-selected', tab==='ringkasan');
+  document.getElementById('tab-latihan').setAttribute('aria-selected', tab==='latihan');
+  document.getElementById('view-ringkasan').hidden = tab!=='ringkasan';
+  document.getElementById('view-latihan').hidden = tab!=='latihan';
+  try{ localStorage.setItem('ukom_tab', tab); }catch(e){}
+}
+
+const RANGKUMAN_TOPICS = [
+  {key:'pemeriksaan', label:'Pemeriksaan Pajak', sub:'BAB 1-6 · Pemeriksaan.pdf'},
+  {key:'dasar', label:'Perpajakan Dasar', sub:'BAB 7-11, 16 · KUP/PPh/PPN/PBB/Coretax'},
+  {key:'pengawasan', label:'Pengawasan & Analisis', sub:'BAB 12-15 · Kepatuhan, Potensi, TP, Ekstensifikasi'},
+  {key:'mansoskul', label:'Mansoskul', sub:'BAB 17-20 · Mansoskul.pdf'}
+];
+let rangkumanTopic = null; /* null = tampilkan semua bab */
+function getBabTopic(idx){ return BAB_TOPIC_MAP[idx] || 'dasar'; }
+function renderRangkumanTopicRow(){
+  const row = document.getElementById('rangkuman-topic-row');
+  if(!row) return;
+  const allBtn = `<button class="topic-btn ${rangkumanTopic===null?'active':''}" onclick="selectRangkumanTopic(null)">Semua<span class="sub">Seluruh 20 bab</span></button>`;
+  row.innerHTML = allBtn + RANGKUMAN_TOPICS.map(t=>
+    `<button class="topic-btn ${rangkumanTopic===t.key?'active':''}" onclick="selectRangkumanTopic('${t.key}')">${t.label}<span class="sub">${t.sub}</span></button>`
+  ).join('');
+}
+function selectRangkumanTopic(key){
+  rangkumanTopic = key;
+  renderRangkumanTopicRow();
+  const visible = BAB.map((b,i)=>i).filter(i=> !rangkumanTopic || getBabTopic(i)===rangkumanTopic);
+  if(!visible.includes(activeBab)) activeBab = visible[0] ?? 0;
+  renderBabNav();
+  renderBabContent();
+}
+function renderBabNav(){
+  const nav = document.getElementById('bab-nav');
+  const items = BAB.map((b,i)=>({b,i})).filter(({i})=> !rangkumanTopic || getBabTopic(i)===rangkumanTopic);
+  nav.innerHTML = items.map(({b,i})=>
+    `<button class="bab-chip ${i===activeBab?'active':''}" onclick="selectBab(${i})"><span class="num">${String(i+1).padStart(2,'0')}</span>${b.title}</button>`
+  ).join('');
+}
+function selectBab(i){
+  activeBab = i;
+  renderBabNav();
+  renderBabContent();
+  document.getElementById('view-ringkasan').scrollIntoView({behavior:'smooth', block:'start'});
+  try{ localStorage.setItem('ukom_bab', String(i)); }catch(e){}
+}
+function renderBabContent(){
+  const b = BAB[activeBab];
+  document.getElementById('bab-content').innerHTML =
+    `<span class="kicker">BAB ${activeBab+1} dari ${BAB.length}</span><h2>${b.title}</h2>${b.html}`;
+}
+
+function renderTopicRow(){
+  const row = document.getElementById('topic-row');
+  row.innerHTML = TOPICS.map(t=>
+    `<button class="topic-btn ${t.key===currentTopic?'active':''}" onclick="selectTopic('${t.key}')">${t.label}<span class="sub">${t.sub}</span></button>`
+  ).join('');
+}
+function selectTopic(key){
+  if(currentTopic===key) return;
+  currentTopic = key;
+  renderTopicRow();
+  document.getElementById('quiz-step2').hidden = false;
+  currentQuiz = []; answeredCount = 0; correctCount = 0;
+  renderScoreBar(); renderQuizList();
+  try{ localStorage.setItem('ukom_topic', key); }catch(e){}
+}
+
+function renderLevelRow(){
+  const row = document.getElementById('level-row');
+  if(!row) return;
+  row.innerHTML = LEVELS.map(l=>
+    `<button class="topic-btn ${l.key===currentLevel?'active':''}" onclick="selectLevel(${l.key})">${l.label}<span class="sub">${l.sub}</span></button>`
+  ).join('');
+}
+function selectLevel(key){
+  if(currentLevel===key) return;
+  currentLevel = key;
+  renderLevelRow();
+  document.getElementById('quiz-step3').hidden = false;
+  currentQuiz = []; answeredCount = 0; correctCount = 0;
+  renderScoreBar(); renderQuizList(); renderCountRow();
+  try{ localStorage.setItem('ukom_level', String(key)); }catch(e){}
+}
+
+function renderCountRow(){
+  const counts = [20,40,60,100];
+  const poolSize = (currentTopic && currentLevel) ? getPool(currentTopic, currentLevel).length : 0;
+  const row = document.getElementById('count-row');
+  row.innerHTML = counts.map(n=>
+    `<button class="count-btn ${n===selectedCount?'active':''}" onclick="selectCount(${n})" id="cnt-${n}">${n}</button>`
+  ).join('');
+  const note = document.getElementById('pool-note');
+  if(note){
+    const willShow = Math.min(selectedCount, poolSize);
+    note.textContent = willShow < selectedCount
+      ? `Tema + Level ini memiliki ${poolSize} soal di bank soal — akan ditampilkan ${willShow} soal.`
+      : `Tersedia ${poolSize} soal pada tema dan level ini.`;
+  }
+}
+function selectCount(n){
+  selectedCount = n;
+  renderCountRow();
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function generateQuiz(){
+  if(!currentTopic || !currentLevel) return;
+  const pool = getPool(currentTopic, currentLevel);
+  const used = getUsedSet(currentTopic, currentLevel);
+  const n = Math.min(selectedCount, pool.length);
+  if(n===0){
+    document.getElementById('quiz-list').innerHTML = `<div class="empty-state"><div class="big">🗂️</div>Belum ada soal untuk kombinasi tema &amp; level ini. Coba pilih level lain.</div>`;
+    currentQuiz=[]; answeredCount=0; correctCount=0; renderScoreBar();
+    return;
+  }
+
+  let available = pool.filter(q=>!used.has(q._id));
+  /* soal tidak diulang sampai pool tema ini benar-benar habis terpakai; baru lalu siklus direset */
+  if(available.length < n){
+    used.clear();
+    available = pool.slice();
+  }
+
+  const high = shuffle(available.filter(q=>q.p===1));
+  const med = shuffle(available.filter(q=>q.p===0));
+  const ordered = high.concat(med).slice(0, n);
+  const picked = shuffle(ordered);
+  picked.forEach(q=>used.add(q._id));
+
+  currentQuiz = picked.map((q, idx)=>{
+    const opts = q.o.map((text,i)=>({text, correct: i===q.c}));
+    const shuffledOpts = shuffle(opts);
+    return {
+      id:'quiz-q-'+idx,
+      bab:q.bab, priority:q.p, question:q.q, explain:q.e,
+      options: shuffledOpts,
+      answered:false, selectedIdx:null
+    };
+  });
+  answeredCount = 0;
+  correctCount = 0;
+  renderScoreBar();
+  renderQuizList();
+  document.getElementById('score-bar-slot').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function renderScoreBar(){
+  const slot = document.getElementById('score-bar-slot');
+  if(currentQuiz.length===0){ slot.innerHTML = ''; return; }
+  const pct = currentQuiz.length ? Math.round((correctCount/currentQuiz.length)*100) : 0;
+  slot.innerHTML = `<div class="score-bar">
+    <span class="sb-left">
+      <span>Terjawab: <b>${answeredCount}</b> / ${currentQuiz.length}</span>
+      <span>Skor: <b>${correctCount}</b> benar &middot; <span class="pct">${pct}%</span></span>
+    </span>
+    <button class="done-btn" onclick="finishQuiz()">✅ Selesai</button>
+  </div>`;
+}
+
+function finishQuiz(){
+  if(currentQuiz.length===0) return;
+  showResultModal();
+}
+
+function showResultModal(){
+  const total = currentQuiz.length;
+  const pct = total ? Math.round((correctCount/total)*100) : 0;
+  let trophy='🏆', title='Latihan Selesai!', msg='';
+  if(pct>=85){ trophy='🏆'; msg='Luar biasa! Pemahaman kamu atas materi ini sudah sangat kuat.'; }
+  else if(pct>=70){ trophy='🎉'; msg='Bagus! Sedikit lagi untuk menguasai seluruh materi ini.'; }
+  else if(pct>=50){ trophy='💪'; msg='Lumayan, tapi masih perlu mengulang beberapa bab lagi.'; }
+  else{ trophy='📘'; msg='Yuk baca ulang Rangkuman Materi, lalu coba latihan lagi.'; }
+
+  document.getElementById('result-trophy').textContent = trophy;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-score').textContent = correctCount + '/' + total;
+  document.getElementById('result-pct').textContent = pct + '% benar · ' + answeredCount + ' dari ' + total + ' soal terjawab';
+  document.getElementById('result-msg').textContent = msg;
+
+  spawnConfetti();
+  document.getElementById('result-modal').hidden = false;
+}
+function closeResultModal(){
+  document.getElementById('result-modal').hidden = true;
+  document.getElementById('result-card').querySelectorAll('.confetti').forEach(el=>el.remove());
+}
+function spawnConfetti(){
+  const card = document.getElementById('result-card');
+  card.querySelectorAll('.confetti').forEach(el=>el.remove());
+  const colors = ['#1e7a3e','#b8860f','#2a52a0','#e0b84a','#7fe0a0'];
+  for(let i=0;i<22;i++){
+    const d = document.createElement('span');
+    d.className = 'confetti';
+    d.style.left = (Math.random()*100) + '%';
+    d.style.background = colors[i % colors.length];
+    d.style.animationDuration = (1.1 + Math.random()*0.9) + 's';
+    d.style.animationDelay = (Math.random()*0.25) + 's';
+    card.appendChild(d);
+  }
+}
+
+function renderQuizList(){
+  const list = document.getElementById('quiz-list');
+  if(currentQuiz.length===0){
+    let hint;
+    if(!currentTopic) hint = 'Pilih <strong>tema</strong> di atas dulu (Pemeriksaan, Pengawasan, Mansoskul, atau Pajak Gabungan) untuk memulai latihan.';
+    else if(!currentLevel) hint = 'Lanjutkan dengan memilih <strong>level kesulitan</strong> (1, 2, atau 3).';
+    else hint = 'Pilih jumlah soal di atas, lalu klik <strong>Acak Soal Baru</strong> untuk memulai latihan.';
+    list.innerHTML = `<div class="empty-state"><div class="big">📝</div>${hint}</div>`;
+    return;
+  }
+  list.innerHTML = currentQuiz.map((item,qi)=>{
+    const letters = ['A','B','C','D'];
+    const optsHtml = item.options.map((opt,oi)=>{
+      let cls = 'opt-btn';
+      if(item.answered){
+        if(opt.correct) cls += ' correct';
+        else if(oi===item.selectedIdx) cls += ' wrong';
+        else cls += ' dim';
+      }
+      return `<button class="${cls}" ${item.answered?'disabled':''} onclick="answerQuiz(${qi},${oi})">
+        <span class="letter">${letters[oi]}</span><span>${opt.text}</span>
+      </button>`;
+    }).join('');
+    const tagHtml = `<span class="tag">${item.bab.split(' - ')[0]}</span>` + (item.priority===1 ? `<span class="tag priority">⚠ Prioritas</span>`:'');
+    const explainHtml = item.answered ? `<div class="explain"><b>Pembahasan</b>${item.explain}</div>` : '';
+    return `<div class="qcard" id="${item.id}">
+      <div class="meta">${tagHtml}</div>
+      <div class="qnum">Soal ${qi+1} dari ${currentQuiz.length}</div>
+      <div class="qtext">${item.question}</div>
+      <div class="opt-list">${optsHtml}</div>
+      ${explainHtml}
+    </div>`;
+  }).join('');
+}
+
+function answerQuiz(qi, oi){
+  const item = currentQuiz[qi];
+  if(item.answered) return;
+  item.answered = true;
+  item.selectedIdx = oi;
+  answeredCount++;
+  if(item.options[oi].correct) correctCount++;
+  renderScoreBar();
+  renderQuizList();
+}
+
+/* ---- init ---- */
+(function init(){
+  renderRangkumanTopicRow();
+  renderBabNav();
+  renderBabContent();
+  renderTopicRow();
+  renderLevelRow();
+  renderCountRow();
+  renderQuizList();
+  try{
+    const t = localStorage.getItem('ukom_tab');
+    if(t==='latihan') switchTab('latihan');
+    const b = localStorage.getItem('ukom_bab');
+    if(b!==null && BAB[+b]){ activeBab=+b; renderBabNav(); renderBabContent(); }
+    const tp = localStorage.getItem('ukom_topic');
+    if(tp && TOPICS.some(x=>x.key===tp)){
+      currentTopic = tp;
+      renderTopicRow();
+      document.getElementById('quiz-step2').hidden = false;
+      const lv = localStorage.getItem('ukom_level');
+      if(lv && LEVELS.some(x=>x.key===+lv)){
+        currentLevel = +lv;
+        renderLevelRow();
+        document.getElementById('quiz-step3').hidden = false;
+        renderCountRow();
+      }
+    }
+  }catch(e){}
+})();
+
+window.claude?.hot?.ready ? window.claude.hot.ready(()=>{}) : null;
+</script>
